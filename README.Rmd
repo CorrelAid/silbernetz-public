@@ -8,6 +8,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Setup
+
+
 This repository contains two main pieces of code:
 
 * the `/silRnetz` package
@@ -45,6 +47,24 @@ looking something like this with the appropriate paths:
 All the data is obtained from the API using the authentication provided by
 the `api_spec.R`. It then gets processed to a level that preserves the anonymitiy
 of all callers to an appropriate level and gets stored locally under `/data/raw`.
+
+### Packages and Starting the app
+
+Packages are very outdated but a (hopefully working) state has been collected in an renv environment. 
+
+To install: 
+
+```
+install(renv)
+renv::restore()
+```
+
+Starting the app, you can either use the RStudio interface in `shinyapp/app.R
+Starting the app, you can either use the RStudio interface in `shinyapp/app.R` or in the console: 
+
+```
+shiny::runApp("shinyapp/app.R")
+```
 
 ---
 ### Known issues:

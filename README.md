@@ -5,9 +5,9 @@ Project name
 
 This repository contains two main pieces of code:
 
--   the `/silbRnetz` package
--   the shiny app interface in `/shinyapp` and the setup follows this
-    order:
+- the `/silRnetz` package
+- the shiny app interface in `/shinyapp` and the setup follows this
+  order:
 
 0.  Install R and RStudio
 1.  Download/clone the repository
@@ -25,8 +25,8 @@ This repository contains two main pieces of code:
     api_urls[['Numbers_Count']] <- paste(url_base, "hash4/Statistics/EVN/Numbers/COUNT", sep = '')
     api_urls[['Callerlists']] <- paste(url_base, "hash5/Lists/Callerlists/1870/Items", sep = '')
 
-3.  Install the `silbRnetz` package. If the computer is synchronized with One-Drive, make sure to remove all paths referencing OneDrive from `.libPaths()` before installing all packages. In order to install packages in the remaining directory, it might be necessary to restart R with sudo privileges. 
-4.  Install Font Open Sans from Google. 
+3.  Install the `silRnetz` package
+4.  Install Font Open Sans
 5.  Setting up the data can be done in two ways: The first possibility
     is just to copy an existing file called `current_data.csv` from an
     old installation into `data/raw`. The second option is to call the
@@ -48,6 +48,22 @@ by the `api_spec.R`. It then gets processed to a level that preserves
 the anonymitiy of all callers to an appropriate level and gets stored
 locally under `/data/raw`.
 
+### Packages and Starting the app
+
+Packages are very outdated but a (hopefully working) state has been
+collected in an renv environment.
+
+To install:
+
+    install(renv)
+    renv::restore()
+
+Starting the app, you can either use the RStudio interface in
+`shinyapp/app.R Starting the app, you can either use the RStudio interface in`shinyapp/app.R\`
+or in the console:
+
+    shiny::runApp("shinyapp/app.R")
+
 ------------------------------------------------------------------------
 
 ### Known issues:
@@ -64,10 +80,3 @@ to make sure that R is installed in a directory not linked to OneDrive
 
 The map-drawing function with the corresponding fonts still causes
 trouble on Mac.
-
-#### Error message for showing heatmaps
-
-If the error message `Error: isTRUE(gpclibPermitStatus()) is not TRUE` appears when
-the heatmap of Germany is loaded (for example when opening the "Karten" tab 
-within the app), installing `install.packages("gpclib")` or
-`install.packages("rgeos")` should solve the problem.
