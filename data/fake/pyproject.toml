@@ -1,0 +1,10 @@
+[project]
+name = "fake"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "faker>=37.5.3",
+    "polars>=1.32.2",
+]
