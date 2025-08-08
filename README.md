@@ -11,7 +11,22 @@ This repository contains two main pieces of code:
 
 0.  Install R and RStudio
 1.  Download/clone the repository
-2.  Obtain the `api_spec.R` file and place this file under `/R`. The
+2.  Install the `silRnetz` package
+3.  Install Font Open Sans
+
+### Dev setup with fake data
+1. rename `data/raw/current_data_fake.csv` to `data/raw/current_data.csv`.
+2. start the app:
+
+```
+shiny::runApp("shinyapp/app.R")
+```
+
+You won't be able to use the "Zahlen aktualisieren" button.
+
+### Setup with real data 
+
+1. obtain the `api_spec.R` file and place this file under `/R`. The
     valid keys can be obtained from Inopla and the final file should
     look like this:
 
@@ -25,15 +40,23 @@ This repository contains two main pieces of code:
     api_urls[['Numbers_Count']] <- paste(url_base, "hash4/Statistics/EVN/Numbers/COUNT", sep = '')
     api_urls[['Callerlists']] <- paste(url_base, "hash5/Lists/Callerlists/1870/Items", sep = '')
 
-3.  Install the `silRnetz` package
-4.  Install Font Open Sans
-5.  Setting up the data can be done in two ways: The first possibility
+2.  Setting up the data can be done in two ways: The first possibility
     is just to copy an existing file called `current_data.csv` from an
     old installation into `data/raw`. The second option is to call the
     `create_current_data` file from the package manually and give it the
-    corresponding path where to write the `current_data.csv` file.
-6.  Start the app which allows to update all numbers.
-7.  Write a bash file that allows to start the app without having to
+    corresponding path where to write the `current_data.csv` file (should be `data/raw`).
+
+3. start the app:
+
+
+```
+shiny::runApp("shinyapp/app.R")
+```
+
+
+### Deployment setup with bash file
+
+1.  Write a bash file that allows to start the app without having to
     start RStudio looking something like this with the appropriate
     paths:
 
