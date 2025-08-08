@@ -6,13 +6,21 @@ from datetime import datetime
 
 # contact ids
 n_calls = 800000
+#n_calls = 80 #development
+
 n_callers = 30000
 contact_ids = range(1, n_calls + 1)
 
 fake = Faker("de_DE")
 Faker.seed(5432)
 
-ortskennzahlen_map = pl.read_csv("../geo/mastertable_vorw_bdl.csv")
+ortskennzahlen_map = pl.read_csv("../geo/mastertable_vorw_bdl.csv", schema_overrides = {
+    "Ortsnetzkennzahl": pl.String,
+    "Ortsnetzname": pl.String,
+    "Bundesland": pl.String,
+    "PLZ": pl.String
+})
+print(ortskennzahlen_map)
 ortskennzahlen_map["Ortsnetzkennzahl"]
 
 calls = {
@@ -21,10 +29,10 @@ calls = {
     "caller": [random.choice(range(0, n_callers)) for _ in range(n_calls)],
     "duration_inbound" : [random.randrange(0, 2000, 1) for _ in range(n_calls)],
     "duration_outbound" : [random.randrange(0, 2000, 1) for _ in range(n_calls)],
-    "success" : [random.choices([True, False], [0.61, 0.39])[0] for _ in range(n_calls)],
-    "landline":  [random.choices([True, False], [0.55, 0.45])[0] for _ in range(n_calls)],
+    "success" : [random.choices(["TRUE", "FALSE"], [0.61, 0.39])[0] for _ in range(n_calls)],
+    "landline":  [random.choices(["TRUE", "FALSE"], [0.55, 0.45])[0] for _ in range(n_calls)],
     "Ortsnetzkennzahl": [random.choice(ortskennzahlen_map["Ortsnetzkennzahl"]) for _ in range(n_calls)],
-    "firstcall" : [random.choices([True, False], [0.61, 0.39])[0] for _ in range(n_calls)]
+    "firstcall" : [random.choices(["TRUE", "FALSE"], [0.61, 0.39])[0] for _ in range(n_calls)]
 }
 
 # Create a Polars DataFrame
