@@ -1,20 +1,28 @@
 Project name
 ================
 
-## Setup
+## Basic Setup
 
 This repository contains two main pieces of code:
 
-- the `/silRnetz` package
+- the `/silbRnetz` package
 - the shiny app interface in `/shinyapp` and the setup follows this
   order:
 
-0.  Install R and RStudio
+0.  Install R and Positron or RStudio
 1.  Download/clone the repository
-2.  Install the `silRnetz` package
-3.  Install Font Open Sans
+2.  Install Font Open Sans
 
-### Dev setup with fake data
+
+### Data
+All the data is obtained from the API using the authentication provided
+by the `api_spec.R`. It then gets processed to a level that preserves
+the anonymitiy of all callers to an appropriate level and gets stored
+locally under `/data/raw`.
+
+#### Fake data
+To get started without accessing the data via the API, you can use the fake data provided with the repository. 
+
 1. rename `data/raw/current_data_fake.csv` to `data/raw/current_data.csv`.
 2. start the app:
 
@@ -24,7 +32,7 @@ shiny::runApp("shinyapp/app.R")
 
 You won't be able to use the "Zahlen aktualisieren" button.
 
-### Setup with real data 
+#### Real data
 
 1. obtain the `api_spec.R` file and place this file under `/R`. The
     valid keys can be obtained from Inopla and the final file should
@@ -54,7 +62,48 @@ shiny::runApp("shinyapp/app.R")
 ```
 
 
-### Deployment setup with bash file
+### Package management
+Packages are very outdated but a (hopefully working) state has been
+collected in an renv environment.
+
+To install:
+
+```
+install(renv)
+renv::restore()
+```
+
+To add new packages
+
+```
+renv::install("packagename") # installs new package 
+renv::snapshot() # adds new package to the renv.lock file  
+```
+
+
+For other potentially useful functionality (updating packages...) of `renv`, refer to the [renv documentation](https://rstudio.github.io/renv/reference/index.html).
+
+#### Working with the silbRnetz package
+The folder `silbRnetz` contains an internal R package. 
+
+it will be installed when using `renv::restore()` from the local tarball `silbRnetz_0.0.12.tar.gz`.
+
+Over the course of the project, you will potentiall write new code and/or refactor old code in the silbRnetz package. To make this available to the app, you need to load the changed functions into R. To do this, execute in the console whenever you changed something:
+
+```
+devtools::load_all("silbRnetz")
+```
+
+### Starting the app
+
+
+To start the app, you can either use the RStudio interface in `shinyapp/app.R`
+or in the console:
+
+    shiny::runApp("shinyapp/app.R")
+
+
+#### Deployment setup with bash file
 
 1.  Write a bash file that allows to start the app without having to
     start RStudio looking something like this with the appropriate
@@ -64,30 +113,6 @@ shiny::runApp("shinyapp/app.R")
 
     "C:/Program Files/R/R-3.6.3/bin/Rscript.exe" -e "shiny::runApp('C:/Users/USER/Desktop/cards', launch.browser = TRUE)"
 
-### Data
-
-All the data is obtained from the API using the authentication provided
-by the `api_spec.R`. It then gets processed to a level that preserves
-the anonymitiy of all callers to an appropriate level and gets stored
-locally under `/data/raw`.
-
-### Packages and Starting the app
-
-Packages are very outdated but a (hopefully working) state has been
-collected in an renv environment.
-
-To install:
-
-    install(renv)
-    renv::restore()
-
-Starting the app, you can either use the RStudio interface in
-`shinyapp/app.R Starting the app, you can either use the RStudio interface in`shinyapp/app.R\`
-or in the console:
-
-    shiny::runApp("shinyapp/app.R")
-
-------------------------------------------------------------------------
 
 ### Known issues:
 
