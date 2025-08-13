@@ -7,7 +7,7 @@ This repository contains two main pieces of code:
 
 - the `/silbRnetz` package
 - the shiny app interface in `/shinyapp` and the setup follows this
-  order:
+  order :
 
 0.  Install R and Positron or RStudio
 1.  Download/clone the repository
