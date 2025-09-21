@@ -56,10 +56,10 @@ heatmap_laender <- function(numbers_geo, variable, start_date = NULL, end_date =
       }
   }
 
-  # turn shape file into dataframe
-  df_germany_lev1 <- fortify(germany_lev1 , region = "NAME_1") %>%
-    mutate(across(.cols=c(id, group), ~str_replace(.x, "Ã¼", "ue"))) %>%
-    mutate(across(.cols=c(id, group), ~str_replace(.x, "ü", "ue"))) # need 'ue' to match with bundeslaendern
+  # turn SpatialPolygonsDataFrame into sf dataframe
+  df_germany_lev1 <- st_as_sf(germany_lev1) %>% 
+    rename(Bundesland = NAME_1) %>% 
+    mutate(Bundesland = str_replace(Bundesland, "ü", "ue")) # need 'ue' to match with bundeslaendern
 
   # filter data if requested
   if (filter_success) {
@@ -108,7 +108,7 @@ heatmap_laender <- function(numbers_geo, variable, start_date = NULL, end_date =
   # merge spatial data and caller data
   df_germany_lev1 <- left_join(df_germany_lev1,
                                calls_aggr %>% filter(Bundesland != "mobil"),
-                               by = c("id" = "Bundesland"))
+                               by = "Bundesland")
 
   # replace zero counts in any bundesland by NA (for the special coloring)
   df_germany_lev1 <- df_germany_lev1 %>%
@@ -118,58 +118,58 @@ heatmap_laender <- function(numbers_geo, variable, start_date = NULL, end_date =
   coord_names <- df_germany_lev1 %>%
     mutate(Bundesland_kuerzel =
              case_when( # use abbreviations for more handy layout
-               id == "Baden-Wuerttemberg" ~ "BW",
-               id == "Bayern" ~ "BY",
-               id == "Berlin" ~ "BE",
-               id == "Brandenburg" ~ "BB",
-               id == "Bremen" ~ "BR",
-               id == "Hamburg" ~ "HH",
-               id == "Hessen" ~ "HE",
-               id == "Mecklenburg-Vorpommern" ~ "MV",
-               id == "Niedersachsen" ~ "NI",
-               id == "Nordrhein-Westfalen" ~ "NW",
-               id == "Rheinland-Pfalz" ~ "RP",
-               id == "Saarland" ~ "SL",
-               id == "Sachsen" ~ "SN",
-               id == "Sachsen-Anhalt" ~ "ST",
-               id == "Schleswig-Holstein" ~ "SH",
-               id == "Thueringen" ~ "TH"
+               Bundesland == "Baden-Wuerttemberg" ~ "BW",
+               Bundesland == "Bayern" ~ "BY",
+               Bundesland == "Berlin" ~ "BE",
+               Bundesland == "Brandenburg" ~ "BB",
+               Bundesland == "Bremen" ~ "BR",
+               Bundesland == "Hamburg" ~ "HH",
+               Bundesland == "Hessen" ~ "HE",
+               Bundesland == "Mecklenburg-Vorpommern" ~ "MV",
+               Bundesland == "Niedersachsen" ~ "NI",
+               Bundesland == "Nordrhein-Westfalen" ~ "NW",
+               Bundesland == "Rheinland-Pfalz" ~ "RP",
+               Bundesland == "Saarland" ~ "SL",
+               Bundesland == "Sachsen" ~ "SN",
+               Bundesland == "Sachsen-Anhalt" ~ "ST",
+               Bundesland == "Schleswig-Holstein" ~ "SH",
+               Bundesland == "Thueringen" ~ "TH"
              )) %>%
-    group_by(id) %>%
+    group_by(Bundesland) %>%
     summarise(Bundesland_kuerzel = unique(Bundesland_kuerzel),
               centr_long = median(long),
               centr_lat  = median(lat),
               !!as.symbol(variable) := first(!!as.symbol(variable)),
               .groups = "drop") %>%
     mutate(centr_lat = case_when( # some manual adjustments of label positions
-      id == "Berlin"        ~ centr_lat - 0.175,
-      id == "Bremen"        ~ centr_lat - 0.475,
-      id == "Niedersachsen" ~ centr_lat - 0.85,
-      id == "Saarland"      ~ centr_lat + 0.1,
-      id == "Schleswig-Holstein" ~ centr_lat -0.3,
-      id == "Sachsen" ~ centr_lat + 0.2,
-      id == "Brandenburg"   ~ centr_lat + 0.4,
-      id == "Baden-Wuerttemberg" ~ centr_lat + 1.1,
-      id == "Mecklenburg-Vorpommern" ~ centr_lat - 0.3,
-      id == "Sachsen-Anhalt" ~ centr_lat  + 0.2,
-      id == "Hessen" ~ centr_lat + 0.1,
-      id == "Bayern" ~ centr_lat + 0.25,
-      id == "Thueringen" ~ centr_lat + 0.1,
+      Bundesland == "Berlin"        ~ centr_lat - 0.175,
+      Bundesland == "Bremen"        ~ centr_lat - 0.475,
+      Bundesland == "Niedersachsen" ~ centr_lat - 0.85,
+      Bundesland == "Saarland"      ~ centr_lat + 0.1,
+      Bundesland == "Schleswig-Holstein" ~ centr_lat -0.3,
+      Bundesland == "Sachsen" ~ centr_lat + 0.2,
+      Bundesland == "Brandenburg"   ~ centr_lat + 0.4,
+      Bundesland == "Baden-Wuerttemberg" ~ centr_lat + 1.1,
+      Bundesland == "Mecklenburg-Vorpommern" ~ centr_lat - 0.3,
+      Bundesland == "Sachsen-Anhalt" ~ centr_lat  + 0.2,
+      Bundesland == "Hessen" ~ centr_lat + 0.1,
+      Bundesland == "Bayern" ~ centr_lat + 0.25,
+      Bundesland == "Thueringen" ~ centr_lat + 0.1,
       TRUE ~ centr_lat
     ),
     centr_long = case_when(
-      id == "Brandenburg"   ~ centr_long -0.35,
-      id == "Bremen"        ~ centr_long +0.15,
-      id == "Hamburg"        ~ centr_long -0.1,
-      id == "Niedersachsen" ~ centr_long +1.8,
-      id == "Sachsen-Anhalt" ~ centr_long - 0.2,
-      id == "Baden-Wuerttemberg" ~ centr_long + 0.45,
-      id == "Bayern" ~ centr_long + 0.85,
-      id == "Schleswig-Holstein" ~ centr_long +0.85,
-      id == "Mecklenburg-Vorpommern" ~ centr_long - 0.8,
-      id == "Nordrhein-Westfalen" ~ centr_long + 0.7,
-      id == "Thueringen" ~ centr_long - 0.15,
-      id == "Saarland"   ~ centr_long - 0.075,
+      Bundesland == "Brandenburg"   ~ centr_long -0.35,
+      Bundesland == "Bremen"        ~ centr_long +0.15,
+      Bundesland == "Hamburg"        ~ centr_long -0.1,
+      Bundesland == "Niedersachsen" ~ centr_long +1.8,
+      Bundesland == "Sachsen-Anhalt" ~ centr_long - 0.2,
+      Bundesland == "Baden-Wuerttemberg" ~ centr_long + 0.45,
+      Bundesland == "Bayern" ~ centr_long + 0.85,
+      Bundesland == "Schleswig-Holstein" ~ centr_long +0.85,
+      Bundesland == "Mecklenburg-Vorpommern" ~ centr_long - 0.8,
+      Bundesland == "Nordrhein-Westfalen" ~ centr_long + 0.7,
+      Bundesland == "Thueringen" ~ centr_long - 0.15,
+      Bundesland == "Saarland"   ~ centr_long - 0.075,
       TRUE ~ centr_long
     ))
 
@@ -182,7 +182,7 @@ heatmap_laender <- function(numbers_geo, variable, start_date = NULL, end_date =
     geom_polygon(aes(
       x = long,
       y = lat,
-      group = id,
+      group = Bundesland,
       subgroup = group,
       fill = !!as.symbol(variable)),
       col = "black",
