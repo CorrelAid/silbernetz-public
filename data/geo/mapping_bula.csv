@@ -1,0 +1,17 @@
+Bundesland,bl_short,lat_correct,lon_correct
+Baden-Württemberg,BW,0,0
+Bayern,BY,-0.1,-0.2
+Berlin,BE,-0.3,0
+Brandenburg,BB,0.5,-0.4
+Bremen,HB,-0.275,0.05
+Hamburg,HH,-0.2,-0.0
+Hessen,HE,-0.2,0
+Mecklenburg-Vorpommern,MV,-0.2,0
+Niedersachsen,NI,-0.4,1.1
+Nordrhein-Westfalen,NW,0.2,-0.1
+Rheinland-Pfalz,RP,0,0
+Saarland,SL,-0.2,0
+Sachsen,SN,0.0,-0.15
+Sachsen-Anhalt,ST,0,0
+Schleswig-Holstein,SH,-0.15,0
+Thüringen,TH,-0.2,-0.1
