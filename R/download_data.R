@@ -24,10 +24,20 @@
 #' download_data("Dest", start_date = "2021-05-01", end_date = "2021-05-31")}
 #'
 #' @export
-download_data <- function(endpoint, start_date = NULL, end_date = NULL, verbose = TRUE, create_firstcall_column = TRUE){
-
-  if(!endpoint %in% c("Dest", "Dest_Count", "Numbers", "Numbers_Count", "Callerlists")){
-    warning("Endpoint has to be one of Dest, Dest_Count, Numbers, Numbers_Count, Callerlists")
+download_data <- function(
+  endpoint,
+  start_date = NULL,
+  end_date = NULL,
+  verbose = TRUE,
+  create_firstcall_column = TRUE
+) {
+  if (
+    !endpoint %in%
+      c("Dest", "Dest_Count", "Numbers", "Numbers_Count", "Callerlists")
+  ) {
+    warning(
+      "Endpoint has to be one of Dest, Dest_Count, Numbers, Numbers_Count, Callerlists"
+    )
     return(NULL)
   }
 
@@ -38,7 +48,7 @@ download_data <- function(endpoint, start_date = NULL, end_date = NULL, verbose 
   url <- api_urls[[endpoint]]
 
   # Specify parameters if they are provided
-  if(!is.null(start_date) && !is.null(end_date)){
+  if (!is.null(start_date) && !is.null(end_date)) {
     # Make sure that the date format is correct
     start_date <- lubridate::ymd(start_date)
     end_date <- lubridate::ymd(end_date)
@@ -49,25 +59,31 @@ download_data <- function(endpoint, start_date = NULL, end_date = NULL, verbose 
 
     url <- paste(url, param, sep = '')
   }
-  if(xor(is.null(start_date), is.null(end_date))){
+  if (xor(is.null(start_date), is.null(end_date))) {
     warning("Either both start_date and end_date must be specified or none")
     return(NULL)
   }
 
   # Make GET request and extract the data
-  if(verbose){print("Making API request...")}
+  if (verbose) {
+    print("Making API request...")
+  }
   r <- httr::GET(url)
-  if(verbose){print("Parsing response...")}
-  js <- jsonlite::fromJSON(httr::content(r, as='text'))
-  if(verbose){print("Download finished!")}
+  if (verbose) {
+    print("Parsing response...")
+  }
+  js <- jsonlite::fromJSON(httr::content(r, as = 'text'))
+  if (verbose) {
+    print("Download finished!")
+  }
 
   # If we ask for "XY_Count", we only get one number
-  if(endpoint %in% c("Dest_Count", "Numbers_Count")){
+  if (endpoint %in% c("Dest_Count", "Numbers_Count")) {
     return(js$response)
   }
 
   dat <- dplyr::as_tibble(js$response$data) %>%
-    mutate(date = lubridate::ymd(date)) %>%
+    #mutate(date = lubridate::ymd(date)) %>%
     dplyr::select(any_of(
       c(
         "date",
@@ -83,10 +99,13 @@ download_data <- function(endpoint, start_date = NULL, end_date = NULL, verbose 
       )
     ))
 
-  if(isTRUE(create_firstcall_column)){
-    dat <- dat %>% group_by(caller) %>%
-      mutate(datetime = lubridate::ymd_hms(paste(date,time)),
-             firstcall = datetime == min(datetime)) %>%
+  if (isTRUE(create_firstcall_column)) {
+    dat <- dat %>%
+      group_by(caller) %>%
+      mutate(
+        datetime = lubridate::ymd_hms(paste(date, time)),
+        firstcall = datetime == min(datetime)
+      ) %>%
       ungroup %>%
       select(-datetime)
   }

@@ -33,21 +33,29 @@
 #' }
 #'
 #' @export
-add_geodata_to_numbers <- function(numbers, geo_cols = c("Ortsnetzname",
-                                                         "Bundesland",
-                                                         "PLZ")){
+add_geodata_to_numbers <- function(
+  numbers,
+  geo,
+  geo_cols = c("Ortsnetzname", "Bundesland", "PLZ")
+) {
   # select relevant cols from geodata master table
   geo %>%
     select(Ortsnetzkennzahl, any_of(geo_cols))
 
   # change column type for data and add landline column
   numbers <- numbers %>%
-    mutate(date = lubridate::ymd(date),
-           landline = str_detect(caller, "00491", negate = TRUE))
+    mutate(
+      date = lubridate::ymd(date),
+      landline = str_detect(caller, "00491", negate = TRUE)
+    )
 
   # merge
   numbers_geo <- numbers %>%
-    fuzzy_left_join(., geo,
-                    by = c("caller" = "Ortsnetzkennzahl"), match_fun = str_detect)
+    fuzzyjoin::fuzzy_left_join(
+      .,
+      geo,
+      by = c("caller" = "Ortsnetzkennzahl"),
+      match_fun = str_detect
+    )
   return(numbers_geo)
 }

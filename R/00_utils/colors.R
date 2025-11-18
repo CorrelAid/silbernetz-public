@@ -1,6 +1,0 @@
-corporate_purple    <- '#4c2582'
-corporate_yellow    <- '#faca96'
-corporate_blue      <- '#003e65'
-corporate_rose      <- '#f5b2af'
-corporate_red       <- '#7b002f'
-corporate_lightblue <- '#bde4f7'
