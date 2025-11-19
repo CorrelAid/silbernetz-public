@@ -8,7 +8,7 @@
 #' @export
 #'
 
-hash_col <- function(data, column  = 'caller'){
-  data[[column]] <- openssl::sha256(data[[column]])
+hash_col <- function(data, column = 'caller') {
+  data[[column]] <- openssl::sha256(data[[column]]) |> as.character()
   return(data)
 }

@@ -46,7 +46,7 @@ add_geodata_to_numbers <- function(
   numbers <- numbers %>%
     mutate(
       date = lubridate::ymd(date),
-      landline = str_detect(caller, "00491", negate = TRUE)
+      landline = stringr::str_detect(caller, "00491", negate = TRUE)
     )
 
   # merge
@@ -55,7 +55,7 @@ add_geodata_to_numbers <- function(
       .,
       geo,
       by = c("caller" = "Ortsnetzkennzahl"),
-      match_fun = str_detect
+      match_fun = stringr::str_detect
     )
   return(numbers_geo)
 }
