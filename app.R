@@ -6,16 +6,18 @@ library(openxlsx)
 library(here)
 library(sf)
 
+# load .env
+dotenv::load_dot_env()
+
 # read in data
 geo <- readr::read_csv("data/geo/mastertable_vorw_bdl.csv")
-bula_map <- readr::read_csv("data/geo/mapping-bula-short.csv")
+bula_map <- readr::read_csv("data/geo/mapping_bula.csv")
 bula_geo <- sf::read_sf("data/geo/DEU_adm/", layer = "DEU_adm1") |>
   dplyr::rename(Bundesland = NAME_1) |>
   dplyr::inner_join(bula_map, by = "Bundesland")
 
 
-current_data <- fs::dir_ls('data/raw/annual') |>
-  purrr::map_dfr(readr::read_csv, col_types = "Dtciillicccl") |>
+current_data <- read_annual_data() |>
   add_first_call_column()
 
 # UI ----------------------------------------------------------------------
@@ -224,54 +226,6 @@ ui <- fluidPage(
   )
 )
 
-# Update-Function ---------------------------------------------------------
-update_data <- function(data, path) {
-  d <- download_data(
-    "Numbers",
-    start_date = max(data$date),
-    end_date = Sys.Date(),
-    create_firstcall_column = FALSE
-  ) %>%
-    add_geodata_to_numbers(geo = geo) %>%
-    remove_redundant_cols() %>%
-    hash_col() %>%
-    mutate(date = lubridate::ymd(date))
-
-  # create firstcall column in OLD data, if there is none yet, otherwise leave it alone
-  if (!"firstcall" %in% names(data)) {
-    data <- data %>%
-      group_by(caller) %>%
-      mutate(
-        datetime = lubridate::ymd_hms(paste(date, time)),
-        firstcall = datetime == min(datetime)
-      ) %>%
-      ungroup %>%
-      select(-datetime)
-  }
-
-  # create firstcall column in NEW data
-  d <- d %>%
-    group_by(caller) %>%
-    mutate(
-      datetime = lubridate::ymd_hms(paste(date, time)),
-      firstcall = ifelse(
-        caller %in% unique(data$caller),
-        FALSE,
-        datetime == min(datetime)
-      )
-    ) %>%
-    ungroup %>%
-    select(-datetime)
-
-  # create updated data from old data + new rows
-  d <- rbind(data, d)
-  d <- d[!duplicated(d), ]
-
-  # write updated data
-  write.csv(d, path, row.names = FALSE)
-  return(d)
-}
-
 
 # Server-Function ---------------------------------------------------------
 server <- function(input, output, session) {
@@ -299,8 +253,7 @@ server <- function(input, output, session) {
   ## Update-button -----------------------------------------------------------
   # Update numbers when button pressed:
   observeEvent(input$update_numbers, {
-    present_data$data <- update_data(present_data$data, file)
-    write.csv(present_data$data, file, row.names = FALSE) # overwrite old data
+    present_data$data <- update_call_data(present_data$data)
   })
 
   ## Daily table -------------------------------------------------------------

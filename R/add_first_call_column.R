@@ -10,5 +10,6 @@ add_first_call_column <- function(data) {
   data <- data |>
     group_by(caller) |>
     arrange(date, time, .by_group = TRUE) |>
-    mutate(firstcall = row_number() == 1)
+    mutate(firstcall = row_number() == 1) |>
+    ungroup()
 }
