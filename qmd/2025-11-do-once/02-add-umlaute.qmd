@@ -1,0 +1,21 @@
+
+```{r}
+
+library(tidyverse)
+# fix ue -> ü in data
+mastertable <- readr::read_csv("data/geo/mastertable_vorw_bdl.csv")
+
+mastertable <- mastertable |> 
+    dplyr::mutate(Bundesland = str_replace_all(Bundesland, "ue", "ü"))
+mastertable |> readr::write_csv("data/geo/mastertable_vorw_bdl.csv")
+
+# in old data
+all_files <- fs::dir_ls('data/raw/annual') 
+for (f in all_files) {
+    df <- readr::read_csv(f)
+    df <- df |>
+        dplyr::mutate(Bundesland = str_replace_all(Bundesland, "ue", "ü")) |> 
+        readr::write_csv(f)
+}
+  
+```

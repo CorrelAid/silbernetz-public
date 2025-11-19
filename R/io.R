@@ -18,15 +18,19 @@ split_and_write <- function(calls_df, path = "data/raw/annual") {
 
 #' reads separate annual csv's and binds them together
 #' @param path data folder path. defaults to `data/raw/annual`
+#' @param col_types column types for readr::read_csv. defaults to "Dtciillccccl"
 #' @return tibble data frame with all calls since 2020.
-read_annual_data <- function(path = "data/raw/annual") {
+read_annual_data <- function(
+  path = "data/raw/annual",
+  col_types = "Dtciillccccl"
+) {
   fs::dir_ls(path) |>
-    purrr::map_dfr(readr::read_csv, col_types = "Dtciillclccc")
+    purrr::map_dfr(readr::read_csv, col_types = col_types)
 }
 
 read_current_data <- function(
   file = "data/raw/current_data.csv",
-  col_types = "Dtciillclccc"
+  col_types = "Dtciillccccl"
 ) {
   readr::read_csv(file, col_types = col_types)
 }
