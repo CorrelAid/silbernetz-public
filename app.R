@@ -16,13 +16,15 @@ bula_geo <- sf::read_sf("data/geo/DEU_adm/", layer = "DEU_adm1") |>
   dplyr::rename(Bundesland = NAME_1) |>
   dplyr::inner_join(bula_map, by = "Bundesland")
 
-
 current_data <- read_annual_data() |>
   add_first_call_column()
 
+# load font
+systemfonts::add_fonts("assets/font/")
+
 # UI ----------------------------------------------------------------------
 ui <- fluidPage(
-  titlePanel("Silbernetz"),
+  titlePanel("Silbernetz e.V. Reporting"),
   hr(),
 
   tabsetPanel(
