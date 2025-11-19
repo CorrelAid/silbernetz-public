@@ -21,5 +21,12 @@ split_and_write <- function(calls_df, path = "data/raw/annual") {
 #' @return tibble data frame with all calls since 2020.
 read_annual_data <- function(path = "data/raw/annual") {
   fs::dir_ls(path) |>
-    purrr::map_dfr(readr::read_csv, col_types = "Dtciillccccl")
+    purrr::map_dfr(readr::read_csv, col_types = "Dtciillclccc")
+}
+
+read_current_data <- function(
+  file = "data/raw/current_data.csv",
+  col_types = "Dtciillclccc"
+) {
+  readr::read_csv(file, col_types = col_types)
 }

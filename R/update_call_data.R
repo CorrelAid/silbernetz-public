@@ -1,10 +1,11 @@
 #' gets new calls from API, updates annual csvs
 #' @param current_data tibble containing calls (from "Numbers" API endpoint).
+#' @param geo geo data mastertable
 #' @details
 #' takes newest date in current data and gets all calls from the API that have happened since that date.
 #' writes out annual csvs for affected years to disk.
 #'
-update_call_data <- function(current_data) {
+update_call_data <- function(current_data, geo) {
   start_date <- max(current_data$date)
   # remove from current_data so that we don't create duplicate rows because we had
   # downloaded "half a day" last time
@@ -15,8 +16,7 @@ update_call_data <- function(current_data) {
     end_date = Sys.Date() # today
   )
   print("Adding geodata and hashing. This takes a while.")
-  new_data |>
-    new_data |>
+  new_data <- new_data |>
     add_geodata_to_numbers(geo = geo) %>%
     remove_redundant_cols() %>%
     hash_col()
@@ -33,7 +33,7 @@ update_call_data <- function(current_data) {
   affected_data <- updated_data |>
     mutate(year = lubridate::year(date)) |>
     filter(year %in% affected_years)
-  split_and_write(affected_data)
+  #split_and_write(affected_data)
 
   return(updated_data)
 }
