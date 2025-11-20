@@ -96,7 +96,7 @@ bundeslaender_map <- function(
   # aggregate calls by bundesland
   calls_aggr <- numbers_geo %>%
     dplyr::mutate(
-      Bundesland = if_else(landline == FALSE, "mobil", Bundesland)
+      Bundesland = if_else(is_landline == FALSE, "mobil", Bundesland)
     ) %>%
     dplyr::group_by(Bundesland, .drop = FALSE) %>%
     dplyr::summarise(

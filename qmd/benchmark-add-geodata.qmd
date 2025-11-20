@@ -1,0 +1,121 @@
+
+```{r}
+library(bench)
+library(tidyverse)
+dotenv::load_dot_env()
+# source all R files in R/
+all_files <- fs::dir_ls("R") |> 
+    purrr::walk(source)
+```
+
+
+```{r}
+okz <- readr::read_csv("data/geo/mastertable_vorw_bdl.csv")
+```
+
+
+```{r}
+# download test data
+nmb <- download_numbers(start_date = "2025-10-01", "2025-10-31")
+nmb <- nmb |> add_is_landline_column() # add landline column
+```
+
+
+
+**Problem:** Adding geodata took quite long. How to reduce that time?
+
+```{r}
+old_add_geodata <- function(
+  numbers,
+  geo,
+  geo_cols = c("Ortsnetzname", "Bundesland", "PLZ")
+) {
+  # select relevant cols from OKZ master table
+  geo |>
+    dplyr::select(Ortsnetzkennzahl, any_of(geo_cols))
+
+  # merge
+  numbers_geo <- numbers |>
+    fuzzyjoin::fuzzy_left_join(
+      geo,
+      by = c("caller" = "Ortsnetzkennzahl"),
+      match_fun = stringr::str_detect
+    )
+  return(numbers_geo |> dplyr::arrange(date, time, caller))
+}
+```
+
+
+
+```{r}
+bm <- bench::mark(
+    old_add_geodata(nmb, okz)
+)
+print(bm)
+```
+
+## Improvement
+
+A first improvement is to only do the fuzzy join on the landline columns:
+
+```{r}
+improved_add_geodata <- function(
+  numbers,
+  geo,
+  geo_cols = c("Ortsnetzname", "Bundesland", "PLZ")
+) {
+  # select relevant cols from geodata master table
+  geo <- geo |>
+    dplyr::select(Ortsnetzkennzahl, any_of(geo_cols))
+
+  landline_df <- numbers |>
+    dplyr::filter(is_landline) |>
+    fuzzyjoin::fuzzy_left_join(
+      geo,
+      by = c("caller" = "Ortsnetzkennzahl"),
+      match_fun = stringr::str_detect
+    )
+
+  # merge
+  numbers_geo <- landline_df |>
+    dplyr::bind_rows(numbers |> dplyr::filter(!is_landline))
+  return(numbers_geo |> dplyr::arrange(date, time, caller))
+}
+```
+
+
+```{r}
+bm <- bench::mark(
+    old_add_geodata(nmb, okz), 
+    improved_add_geodata(nmb, okz)
+)
+print(bm)
+```
+
+Takes only approx. half the time. :tada:
+
+## Avoiding `fuzzy_join`
+
+OKZ have differing lengths, but not too many
+
+```{r}
+okz$okz_len <- nchar(okz$Ortsnetzkennzahl) - 3 # subtract 3 because 0049 replaces 0
+print(table(okz$okz_len))
+okz$okz_len <- NULL
+
+```
+
+
+We can use this to our advantage to avoid the fuzzy join. We can do a long format, keeping differing lengths of `caller` number as "joining options" / "candidates" to match with the geodata. and then we can use a simple `left_join` and filter afterwards.
+
+See `R/process_data.R` for new `add_geodata_to_numbers` function.
+
+```{r}
+bm <- bench::mark(
+    old_add_geodata(nmb, okz),
+    improved_add_geodata(nmb, okz),
+    add_geodata_to_numbers(nmb, okz)
+)
+bm
+```
+

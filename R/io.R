@@ -7,10 +7,10 @@ split_and_write <- function(calls_df, path = "data/raw/annual") {
     mutate(year = lubridate::year(date)) |>
     tidyr::nest(.by = year)
 
-  pwalk(nested, function(year, data) {
+  purrr::pwalk(nested, function(year, data) {
     print(sprintf("Writing csv for %i", year))
     readr::write_csv(
-      data |> dplyr::arrange(date),
+      data |> dplyr::ungroup() |> dplyr::arrange(date, time, caller),
       fs::path(path, year, ext = "csv")
     )
   })

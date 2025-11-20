@@ -1,0 +1,18 @@
+
+```{r}
+library(tidyverse)
+fs::dir_ls("R") |> 
+    walk(source)
+```
+
+```{r}
+all_data <- read_annual_data()
+```
+
+```{r}
+all_data |> colnames()
+
+all_data$is_landline <- all_data$landline
+
+split_and_write(all_data)
+```

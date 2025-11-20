@@ -13,3 +13,15 @@ add_first_call_column <- function(data) {
     mutate(firstcall = row_number() == 1) |>
     ungroup()
 }
+
+
+add_is_landline_column <- function(data) {
+  data |>
+    dplyr::mutate(
+      is_landline = stringr::str_detect(
+        caller,
+        "^00491|^491|^0049800|^49800", # in case we find more that are not landline, add here
+        negate = TRUE
+      )
+    )
+}

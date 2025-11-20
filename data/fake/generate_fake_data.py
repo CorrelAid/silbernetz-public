@@ -30,7 +30,7 @@ calls = {
     "duration_inbound" : [random.randrange(0, 2000, 1) for _ in range(n_calls)],
     "duration_outbound" : [random.randrange(0, 2000, 1) for _ in range(n_calls)],
     "success" : [random.choices(["TRUE", "FALSE"], [0.61, 0.39])[0] for _ in range(n_calls)],
-    "landline":  [random.choices(["TRUE", "FALSE"], [0.55, 0.45])[0] for _ in range(n_calls)],
+    "is_landline":  [random.choices(["TRUE", "FALSE"], [0.55, 0.45])[0] for _ in range(n_calls)],
     "Ortsnetzkennzahl": [random.choice(ortskennzahlen_map["Ortsnetzkennzahl"]) for _ in range(n_calls)],
     "firstcall" : [random.choices(["TRUE", "FALSE"], [0.61, 0.39])[0] for _ in range(n_calls)]
 }

@@ -255,7 +255,7 @@ server <- function(input, output, session) {
   ## Update-button -----------------------------------------------------------
   # Update numbers when button pressed:
   observeEvent(input$update_numbers, {
-    present_data$data <- update_call_data(present_data$data)
+    present_data$data <- update_call_data(present_data$data, okz = geo)
   })
 
   ## Daily table -------------------------------------------------------------

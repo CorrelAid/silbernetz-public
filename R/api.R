@@ -126,7 +126,7 @@ download_numbers <- function(start_date, end_date) {
       )
     )) |>
     # type conversions for date and time
-    mutate(date = lubridate::ymd(date), time = hms::as_hms(time))
+    dplyr::mutate(date = lubridate::ymd(date), time = hms::as_hms(time))
 }
 
 #' Perform a GET request to an API endpoint
