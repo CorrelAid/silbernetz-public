@@ -21,10 +21,15 @@ split_and_write <- function(calls_df, path = "data/raw/annual") {
 #' @param col_types column types for readr::read_csv. defaults to "Dtciillccccl"
 #' @return tibble data frame with all calls since 2020.
 read_annual_data <- function(
-  path = "data/raw/annual",
+  path = Sys.getenv("DATA_FOLDER"),
   col_types = "Dtciillccccl"
 ) {
-  fs::dir_ls(path) |>
+  if (path == "") {
+    stop(
+      "environment variable DATA_FOLDER is not set. See README on how to set up the .env file."
+    )
+  }
+  fs::dir_ls(path, glob = "*.csv") |>
     purrr::map_dfr(readr::read_csv, col_types = col_types)
 }
 

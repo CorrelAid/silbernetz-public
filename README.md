@@ -1,79 +1,87 @@
-Project name
+Silbernetz Dashboard
 ================
 
-## Basic Setup
+[Shiny](https://shiny.posit.co/) Dashboard for Silbernetz e.V. 
+Initially developed as part of a [CorrelAid data4good volunteering project](https://correlaid.org/daten-nutzen/projektdatenbank/2021-07-SIL/) between 2021 and 2022. Revisited in autumn 2025 to update the app. 
 
-This repository contains two main pieces of code:
-
-- the `/silbRnetz` package
-- the shiny app interface in `/shinyapp` and the setup follows this
-  order :
-
-0.  Install R and Positron or RStudio
-1.  Download/clone the repository
-2.  Install Font Open Sans
-
+### App
+- `app.R`
+- functions in `R` are automatically loaded at startup
 
 ### Data
-All the data is obtained from the API using the authentication provided
-by the `api_spec.R`. It then gets processed to a level that preserves
-the anonymitiy of all callers to an appropriate level and gets stored
-locally under `/data/raw`.
+#### Call data
+- call data is stored in `data/raw/annual/`. Each year has its own csv file. 
+- Fake data is provided in `data/raw/annual_fake/`.
+- Real data is not part of this repository due to data protection concerns. 
+- Real data goes back to `2020-09-05`.
 
-#### Fake data
-To get started without accessing the data via the API, you can use the fake data provided with the repository. 
+#### Geo data
+- `data/geo/DEU_admin`: shapefile for Bundesländer
+- `mapping_bula.csv`: mapping containing additional information for each Bundesland
+- `mastertable_vorw_bdl.csv`: maps Ortskennzahl ("Vorwahl") to Bundesland.
 
-1. rename `data/raw/current_data_fake.csv` to `data/raw/current_data.csv`.
-2. start the app:
+### additional files
+- `qmd/create_map.qmd`: create map without starting app
+- `qmd/diagnostics.qmd`: some data quality analyses (e.g. duplicates, data coverage)
+
+# Setup
+## General setup
+1. install R if not already installed on your system
+2. Install [Font Open Sans](https://fonts.google.com/specimen/Open+Sans) on your operating system. You can find the `.tff` files in `assets/font`. Google "install tff on [windows|mac|linux]" to find out how to install a font on your operating system.
+
+## Setup with fake data
+
+To get started without accessing the data via the API, you can use the fake data provided with the repository in the folder `data/raw/annual_fake/`
+
+
+1. Clone or download this repository and place it into a suitable location on your computer.
+2. install dependencies
+
+```r
+install.packages("renv")
+renv::restore()
+```
+3. Copy the `.env-template` to `.env` and set the `DATA_FOLDER` variable as follows:
 
 ```
-shiny::runApp("shinyapp/app.R")
+DATA_FOLDER="data/raw/annual_fake/"
 ```
 
-You won't be able to use the "Zahlen aktualisieren" button.
-
-#### Real data
-
-1. obtain the `api_spec.R` file and place this file under `/R`. The
-    valid keys can be obtained from Inopla and the final file should
-    look like this:
-
-<!-- -->
-
-    url_base <- "url"
-    api_urls <- list()
-    api_urls[['Dest']] <-  paste(url_base, "hash1/Statistics/EVN/Destinations", sep = '')
-    api_urls[['Dest_Count']] <- paste(url_base, "hash2/Statistics/EVN/Destinations/COUNT", sep = '')
-    api_urls[['Numbers']] <- paste(url_base, "hash3/Statistics/EVN/Numbers", sep = '')
-    api_urls[['Numbers_Count']] <- paste(url_base, "hash4/Statistics/EVN/Numbers/COUNT", sep = '')
-    api_urls[['Callerlists']] <- paste(url_base, "hash5/Lists/Callerlists/1870/Items", sep = '')
-
-2.  Setting up the data can be done in two ways: The first possibility
-    is just to copy an existing file called `current_data.csv` from an
-    old installation into `data/raw`. The second option is to call the
-    `create_current_data` file from the package manually and give it the
-    corresponding path where to write the `current_data.csv` file (should be `data/raw`).
-
-3. start the app:
-
+4. Start the app
 
 ```
-shiny::runApp("shinyapp/app.R")
+shiny::runApp("app.R")
 ```
 
+:warning: _In order to work with real data and/or work on the "Zahlen aktualisieren" (Update) functionality, you need authentication details for the hotline provider API. Please see instructions on "Setup with real data"._
 
-### Package management
-Packages are very outdated but a (hopefully working) state has been
-collected in an renv environment.
+## Setup with real data
+1. Clone or download this repository and place it into a suitable location on your computer.
+2. Obtain a historical dump of the real data and put the csv files into `data/raw/annual/`
+3. install dependencies
 
-To install:
+```r
+install.packages("renv")
+renv::restore()
+```
+4. Create `.env` file: Copy `.env-template` to `.env` and fill in values under "Authentication for API". Values can be obtained from your contact at CorrelAid.
+5. Start the app:
+
+```
+shiny::runApp("app.R")
+```
+
+# Package management 
+Package management is done with [renv](https://rstudio.github.io/renv/articles/renv.html).
+
+To install the environment:
 
 ```
 install(renv)
 renv::restore()
 ```
 
-To add new packages
+To add new packages:
 
 ```
 renv::install("packagename") # installs new package 
@@ -83,27 +91,9 @@ renv::snapshot() # adds new package to the renv.lock file
 
 For other potentially useful functionality (updating packages...) of `renv`, refer to the [renv documentation](https://rstudio.github.io/renv/reference/index.html).
 
-#### Working with the silbRnetz package
-The folder `silbRnetz` contains an internal R package. 
+# Deployment 
 
-it will be installed when using `renv::restore()` from the local tarball `silbRnetz_0.0.12.tar.gz`.
-
-Over the course of the project, you will potentiall write new code and/or refactor old code in the silbRnetz package. To make this available to the app, you need to load the changed functions into R. To do this, execute in the console whenever you changed something:
-
-```
-devtools::load_all("silbRnetz")
-```
-
-### Starting the app
-
-
-To start the app, you can either use the RStudio interface in `shinyapp/app.R`
-or in the console:
-
-    shiny::runApp("shinyapp/app.R")
-
-
-#### Deployment setup with bash file
+## With bash file
 
 1.  Write a bash file that allows to start the app without having to
     start RStudio looking something like this with the appropriate
@@ -114,7 +104,7 @@ or in the console:
     "C:/Program Files/R/R-3.6.3/bin/Rscript.exe" -e "shiny::runApp('C:/Users/USER/Desktop/cards', launch.browser = TRUE)"
 
 
-### Known issues:
+# Known issues / Limitations
 
 #### OneDrive on Windows-Machines
 
@@ -124,7 +114,5 @@ can run into problems when installing new packages and we weren’t able
 to install the silbRnetz package. The best way to work around this, was
 to make sure that R is installed in a directory not linked to OneDrive
 
-#### Fonts on Mac
-
-The map-drawing function with the corresponding fonts still causes
-trouble on Mac.
+#### Manually updating data has side effect
+- if using the `update_data` function to update data outside the app, the function writes out to `data/raw/annual` as a side effect. this is not ideal and should be refactored. 
