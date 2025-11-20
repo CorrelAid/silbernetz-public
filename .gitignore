@@ -11,3 +11,5 @@ results
 silbRnetz/R/api_spec.R
 R/api_spec.R
 /silbRnetz.Rcheck
+
+.env
