@@ -1,0 +1,42 @@
+
+```{r}
+# source all R files in R/
+all_files <- fs::dir_ls("R") |> 
+    walk(source)
+library(tidyverse)
+geo <- readr::read_csv("data/geo/mastertable_vorw_bdl.csv")
+```
+
+Context: refactoring November 2025 
+- instead of one big `current_data.csv`, have one file per year. 
+- those files are in `data/raw/annual`
+
+
+```{r}
+old_data <- read_current_data("data/raw/current_data.csv", col_types = "Dtciillccccl"
+)
+
+```
+
+
+## Update data
+
+_note: this function has the side effect of writing to data from "affected years" to `data/raw/annual`. should be refactored_
+
+```{r}
+path <- "data/raw/annual/" 
+if (!dir.exists(path)) {
+    dir.create(path)
+}
+
+updated_data <- update_call_data(old_data, geo)
+```
+
+
+Split into annual data, write to `data/raw/annual`.
+
+```{r}
+
+split_and_write(updated_data, path = path)
+```
+
