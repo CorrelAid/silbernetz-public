@@ -1,0 +1,126 @@
+
+```{r}
+library(tidyverse)
+source("R/api.R")
+source("R/hash_col.R")
+source("R/io.R")
+source("R/add_call_columns.R")
+dotenv::load_dot_env()
+```
+
+
+```{r}
+current_data <- read_annual_data() |> 
+  add_first_call_column()
+```
+
+# Duplicates
+
+```{r}
+cd_dist <- current_data |> 
+    distinct()
+
+if (cd_dist |> nrow() != current_data |> nrow())  {
+    stop(sprintf("there are duplicates: %i rows vs %i distinct rows", nrow(current_data), nrow(cd_dist)))
+
+}
+```
+
+```{r}
+cd_dup <- current_data |> 
+    add_count(caller, date, time) |> 
+    arrange(desc(n)) |> 
+    mutate(year = lubridate::year(date))
+table(cd_dup$year, cd_dup$n)
+```
+
+**Hypothesis**: This is a technical artifact from how calls are handled within the call provider. we can check the additional info from the API that is contained in the output of `download_numbers`. 
+
+```{r}
+# test data
+nmb <- download_numbers("2025-10-01", "2025-11-14")
+
+nmb_technical_details <- nmb |> group_by(caller, date, time) |> 
+    add_count() |> 
+    arrange(desc(n)) |> 
+    mutate(is_dup = n > 1) |> 
+    select(n, is_dup, date, time, caller, modul_name, duration_inbound, duration_outbound, success)
+
+```
+
+support for hypothesis: 
+
+- all calls were unsuccessful 
+
+```{r}
+table(nmb_technical_details$success, nmb_technical_details$is_dup)
+```
+
+- all calls went through the Routingpunkt Easy
+
+```{r}
+table(nmb_technical_details$modul_name, nmb_technical_details$is_dup)
+```
+
+- all calls did have duration = 0 
+```{r}
+table(nmb_technical_details$duration_inbound == 0, nmb_technical_details$is_dup)
+```
+
+
+
+#### Compare old data with annual data just to make sure io works as  intended
+
+```{r}
+old_cd_data <- readr::read_csv("data/raw/current_data_real.csv")
+
+dups_old_cd <- old_cd_data |> 
+    group_by(caller, date, time) |> 
+    count() |> 
+    arrange(desc(n), desc(date)) |> 
+    filter(n > 1)
+
+
+
+dups_annual <- current_data |> 
+    group_by(caller, date, time) |> 
+    count() |> 
+    arrange(desc(n), desc(date)) |> 
+    filter(n > 1)
+dups_old_cd$n |> table()
+dups_annual$n |> table() # difference seems plausible because annual data has newer calls
+```
+
+
+# Date coverage
+
+
+```{r}
+
+
+min_date <- min(current_data$date)
+max_date <- max(current_data$date)
+
+all_days <- seq(min_date, max_date, "days")
+
+# are all days in the dataset?
+all_days_rep <- all(all_days %in% current_data$date)
+sprintf("All days are in the current dataset: %s", all_days_rep)
+stopifnot(all_days_rep)
+```
+
+
+```{r}
+calls_by_day <- current_data |> 
+    count(date) |> 
+    mutate(year = lubridate::year(date))
+
+ggplot(calls_by_day) + 
+    geom_boxplot(aes(group = year, y = n))
+```
+
+
+```{r}
+calls_by_day |> 
+    arrange(n)
+```

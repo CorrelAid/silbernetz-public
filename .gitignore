@@ -13,3 +13,8 @@ R/api_spec.R
 /silbRnetz.Rcheck
 
 .env
+
+
+# quarto output
+*_files/
+qmd/*.html
