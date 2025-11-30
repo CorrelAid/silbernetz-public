@@ -1,0 +1,106 @@
+
+```{r}
+library(tidyverse)
+all_files <- fs::dir_ls("R") |> 
+    purrr::walk(source)
+
+systemfonts::add_fonts("assets/font/")
+```
+
+
+```{r}
+
+calls <- read_annual_data()
+
+silbernetz_color_scheme <- c("#fddfc1", "#4c2582")
+
+```
+
+# Format date and time data
+```{r}
+calls <- calls %>%
+  mutate(weekday = weekdays(date),
+          hour = lubridate::hour(time)) %>% 
+  mutate(weekday = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"), labels = c("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag")))
+```
+
+# Select time frame for plot
+```{r}
+start_date <- "2025-01-01"
+end_date <- "2025-11-25"
+plot_data <- filter(calls, date >= start_date & date <= end_date)
+```
+
+# Plot all calls per weekday
+```{r}
+ggplot(plot_data, aes(weekday)) +
+  geom_bar(fill = "#4c2582") +
+  scale_y_continuous(labels = scales::label_number()) +
+  ylab("Anzahl Anrufe") +
+  theme_classic() +
+  theme(axis.title.x = element_blank(),
+  axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = silbernetz_color_scheme)
+
+```
+
+# Plot successful/unsucessful calls per weekday
+## To do: Anrufende, die nach mehreren Versuchen durchkommen als "successful" markieren? Legende übersetzen
+```{r}
+ggplot(plot_data, aes(weekday, fill = success)) +
+  geom_bar(color = "#4c2582") +
+  scale_y_continuous(labels = scales::label_number()) +
+  ylab("Anzahl Anrufe") +
+  theme_classic() +
+  theme(axis.title.x = element_blank(),
+  axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("#ebebeb", "#4c2582"))
+
+```
+
+# Day / Time of day tile map (all calls)
+
+```{r}
+start_date <- "2025-01-01"
+end_date <- "2025-11-25"
+plot_data <- filter(calls, date >= start_date & date <= end_date)
+
+start_time <- 0
+end_time <- 23
+plot_data <- filter(plot_data, hour >= start_time & hour <= end_time)
+
+plot_map_data <- plot_data %>% 
+  count(weekday, hour)
+```
+```{r}
+
+ggplot(plot_map_data, aes(x = hour, y = weekday, fill = n)) +
+  geom_tile(color = "white",
+            lwd = 1.5,
+            linetype = 1) +
+  #scale_fill_gradient(low = "white", high = "#4c2582") +
+  theme_minimal()+
+  theme(panel.grid = element_blank(),
+        axis.title.y = element_blank()) +
+  xlab("Uhrzeit") 
+
+```
+
+# Day / Time of day tile map (unsuccessful calls)
+
+```{r}
+plot_unsuccessful <- filter(plot_data, success == FALSE)
+plot_unsuccessful <- plot_unsuccessful %>% 
+  count(weekday, hour)
+
+ggplot(plot_unsuccessful, aes(x = hour, y = weekday, fill = n)) +
+  geom_tile(color = "white",
+            lwd = 1.5,
+            linetype = 1) +
+  scale_fill_gradient(low = "white", high = "#4c2582") +
+  theme_minimal()+
+  theme(panel.grid = element_blank(),
+        axis.title.y = element_blank()) +
+  xlab("Uhrzeit") 
+
+```
