@@ -155,7 +155,7 @@ ui <- fluidPage(
             "Daten für welches Bundesland?",
             choices = list(
               "Alle" = "Alle",
-              "Baden-Württemberg" = "Baden-Wuerttemberg",
+              "Baden-Württemberg" = "Baden-Württemberg",
               "Bayern" = "Bayern",
               "Berlin" = "Berlin",
               "Brandenburg" = "Brandenburg",
@@ -170,7 +170,7 @@ ui <- fluidPage(
               "Sachsen" = "Sachsen",
               "Sachsen-Anhalt" = "Sachsen-Anhalt",
               "Schleswig-Holstein" = "Schleswig-Holstein",
-              "Thüringen" = "Thueringen"
+              "Thüringen" = "Thüringen"
             )
           )
         ),
