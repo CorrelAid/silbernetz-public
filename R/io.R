@@ -1,10 +1,16 @@
 #' split long data by year and write each year to disk
 #' @param calls_df long data frame containing all the calls
 #' @param path data folder path. defaults to `data/raw/annual`
+#' @param years numeric vector of years to write out. defaults to all years between 2020 and the current year.
 #' @return
-split_and_write <- function(calls_df, path = "data/raw/annual") {
+split_and_write <- function(
+  calls_df,
+  path = "data/raw/annual",
+  years = seq(2020, lubridate::year(Sys.Date()))
+) {
   nested <- calls_df |>
-    mutate(year = lubridate::year(date)) |>
+    dplyr::mutate(year = lubridate::year(date)) |>
+    dplyr::filter(year %in% years) |>
     tidyr::nest(.by = year)
 
   purrr::pwalk(nested, function(year, data) {

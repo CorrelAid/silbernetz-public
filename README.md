@@ -113,6 +113,3 @@ completely set up with OneDrive so that all files get synchronized, R
 can run into problems when installing new packages and we weren’t able
 to install the silbRnetz package. The best way to work around this, was
 to make sure that R is installed in a directory not linked to OneDrive
-
-#### Manually updating data has side effect
-- if using the `update_data` function to update data outside the app, the function writes out to `data/raw/annual` as a side effect. this is not ideal and should be refactored. 

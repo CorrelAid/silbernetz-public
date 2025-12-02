@@ -255,7 +255,15 @@ server <- function(input, output, session) {
   ## Update-button -----------------------------------------------------------
   # Update numbers when button pressed:
   observeEvent(input$update_numbers, {
-    present_data$data <- update_call_data(present_data$data, okz = geo)
+    updated_data <- update_call_data(present_data$data, okz = geo)
+    # which years were affected in the update?
+    affected_years <- seq(
+      lubridate::year(max(present_data$data$date)),
+      lubridate::year(max(updated_data$date))
+    )
+
+    split_and_write(updated_data, years = affected_years) # only write out data for years where data was updated
+    present_data$data <- updated_data # update the present_data$data object
   })
 
   ## Daily table -------------------------------------------------------------

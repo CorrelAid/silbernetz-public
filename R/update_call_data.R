@@ -21,20 +21,9 @@ update_call_data <- function(current_data, okz) {
     add_geodata_to_numbers(okz = okz) |>
     remove_redundant_cols() |>
     hash_col()
-
-  # which years are among the new data? affects which datasets we write out.
-  affected_years <- unique(lubridate::year(new_data$date))
   # create updated data from old data + new rows
   updated_data <- dplyr::bind_rows(current_data, new_data) |>
     add_first_call_column()
-
-  # write updated data - only years that were part of new data
-  # most of the time this is only one year but around new year this might be different
-  #  so let's be careful
-  affected_data <- updated_data |>
-    mutate(year = lubridate::year(date)) |>
-    filter(year %in% affected_years)
-  split_and_write(affected_data)
 
   return(updated_data)
 }
