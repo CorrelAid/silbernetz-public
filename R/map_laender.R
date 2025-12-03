@@ -200,7 +200,7 @@ create_yellow_circle <- function(calls_aggr, colors) {
     ggplot2::theme_void(14) +
     ggplot2::geom_point(
       aes(x = 0, y = 0),
-      size = 42,
+      size = 50,
       col = colors["corporate_yellow"]
     ) +
     ggplot2::geom_text(
