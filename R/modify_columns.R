@@ -25,3 +25,36 @@ add_is_landline_column <- function(data) {
       )
     )
 }
+
+
+#' Removes columns that are provided by the API but not needed by us
+#'
+#' @param data data set with data
+#' @param red_cols Columns to remove, defaults to "service", "service_caption",
+#'  "tarif" and "modul_name".
+#'
+#' @return Data with columns removed
+#' @export
+
+remove_redundant_cols <- function(
+  data,
+  red_cols = c("service", "service_caption", "tarif", "modul_name")
+) {
+  return(dplyr::select(data, -dplyr::one_of(red_cols)))
+}
+
+
+#' Replaces a column by its hash-value to increase privacy
+#'
+#' @param d dataframe with data
+#' @param column column that is supposed to be replaced, defaults to caller
+#'
+#' @import openssl
+#' @return Dataframe with the specified column replaced
+#' @export
+#'
+
+hash_col <- function(data, column = 'caller') {
+  data[[column]] <- openssl::sha256(data[[column]]) |> as.character()
+  return(data)
+}
