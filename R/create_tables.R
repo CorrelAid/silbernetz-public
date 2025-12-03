@@ -95,45 +95,33 @@ create_provider_table <- function(df, unit, period_start, period_stop) {
 #' @param df Dataframe/Tibble containing the input data
 #' @param start_date Start of the reporting period
 #' @param end_date End of the reporting period
-#'
+#' @param bula_mapping tibble with full names and short names, to join to the calls df.
 #' @return Returns table
 #'
 #' @import dplyr lubridate tidyr
 #'
 #' @export
-create_herkunft_table <- function(df, start_date, end_date) {
+create_herkunft_table <- function(df, start_date, end_date, bula_mapping) {
   # create large table with anrufe and anrufer weekly by bundesland
   df_processed <- df %>%
     dplyr::filter(date >= start_date & date <= end_date) %>%
+    dplyr::left_join(
+      bula_mapping |> select(Bundesland, bl_short),
+      by = c("Bundesland")
+    ) |>
     dplyr::mutate(
-      Bundesland = case_when(
-        # use abbreviations for more handy layout
-        Bundesland == "Baden-Wuerttemberg" ~ "BW",
-        Bundesland == "Bayern" ~ "BY",
-        Bundesland == "Berlin" ~ "BE",
-        Bundesland == "Brandenburg" ~ "BB",
-        Bundesland == "Bremen" ~ "BR",
-        Bundesland == "Hamburg" ~ "HH",
-        Bundesland == "Hessen" ~ "HE",
-        Bundesland == "Mecklenburg-Vorpommern" ~ "MV",
-        Bundesland == "Niedersachsen" ~ "NI",
-        Bundesland == "Nordrhein-Westfalen" ~ "NW",
-        Bundesland == "Rheinland-Pfalz" ~ "RP",
-        Bundesland == "Saarland" ~ "SL",
-        Bundesland == "Sachsen" ~ "SN",
-        Bundesland == "Sachsen-Anhalt" ~ "ST",
-        Bundesland == "Schleswig-Holstein" ~ "SH",
-        Bundesland == "Thueringen" ~ "TH",
-        is.na(Bundesland) & landline ~ "Unbk.",
-        landline == FALSE ~ "Mobil"
+      bl_short_display = case_when(
+        # landline and no bundesland recorded -> unknown
+        is.na(bl_short) & is_landline ~ "Unbk.",
+        is_landline == FALSE ~ "Mobil",
+        .default = bl_short
       )
     )
   # filter(success) %>% # we do not filter here, but take all callers, even those
   # who didn't get through
-
   herkunft_table <- df_processed %>%
     dplyr::mutate(
-      Kalenderwoche = isoweek(date),
+      Kalenderwoche = lubridate::isoweek(date),
       Jahr = lubridate::isoyear(date)
     ) %>%
     dplyr::group_by(Jahr, Kalenderwoche) %>%
@@ -141,7 +129,7 @@ create_herkunft_table <- function(df, start_date, end_date) {
       Start = format(min(date), "%Y-%m-%d"),
       Ende = format(max(date), "%Y-%m-%d")
     ) %>%
-    dplyr::group_by(Jahr, Start, Bundesland) %>%
+    dplyr::group_by(Jahr, Start, bl_short_display) %>%
     dplyr::summarise(
       Kalenderwoche = first(Kalenderwoche),
       Ende = first(Ende),
@@ -151,9 +139,9 @@ create_herkunft_table <- function(df, start_date, end_date) {
       .groups = "drop"
     ) %>%
     tidyr::pivot_wider(
-      names_from = Bundesland,
+      names_from = bl_short_display,
       values_from = c(Anrufe, `Anrufer*innen`, `Erstanrufer*innen`),
-      names_glue = "{Bundesland} {.value}"
+      names_glue = "{bl_short_display} {.value}"
     ) %>%
     dplyr::mutate(
       `Alle Anrufer*innen` = rowSums(
@@ -174,33 +162,21 @@ create_herkunft_table <- function(df, start_date, end_date) {
     )
 
   # create a nice order of columns
+  cols_at_start <- c(
+    "Jahr",
+    "Kalenderwoche",
+    "Start",
+    "Ende"
+  )
   herkunft_table <- herkunft_table %>%
     dplyr::select(
-      Jahr,
-      Kalenderwoche,
-      Start,
-      Ende,
-      `Alle Anrufe`,
-      `Alle Anrufer*innen`,
-      `Alle Erstanrufer*innen`,
+      tidyselect::all_of(cols_at_start),
+      contains("Alle"),
       contains("Mobil"),
-      contains("BW "),
-      contains("BY "),
-      contains("BE "),
-      contains("BB "),
-      contains("BR "),
-      contains("HH "),
-      contains("HE "),
-      contains("MV "),
-      contains("NI "),
-      contains("NW "),
-      contains("RP "),
-      contains("SL "),
-      contains("SN "),
-      contains("ST "),
-      contains("SH "),
-      contains("TH "),
-      contains("Unbk.")
+      sort(setdiff(
+        names(.),
+        c(fixed, names(select(., contains("Alle"), contains("Mobil"))))
+      )) # takes all columns that have not been sorted yet and sorts them alphabetically.  works out fine because "Unbek." is after the last Bundesland (TH)
     ) %>%
     dplyr::arrange(desc(Start)) %>%
     dplyr::mutate(Start = lubridate::as_date(Start)) %>%
