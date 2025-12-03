@@ -171,8 +171,8 @@ create_herkunft_table <- function(df, start_date, end_date, bula_mapping) {
   herkunft_table <- herkunft_table %>%
     dplyr::select(
       tidyselect::all_of(cols_at_start),
-      contains("Alle"),
-      contains("Mobil"),
+      sort(names(select(., contains("Alle")))),
+      sort(names(select(., contains("Mobil")))),
       sort(setdiff(
         names(.),
         c(fixed, names(select(., contains("Alle"), contains("Mobil"))))
