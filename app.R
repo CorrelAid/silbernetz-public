@@ -11,10 +11,10 @@ dotenv::load_dot_env()
 
 # read in data
 geo <- readr::read_csv("data/geo/mastertable_vorw_bdl.csv")
-bula_map <- readr::read_csv("data/geo/mapping_bula.csv")
+bula_mapping <- readr::read_csv("data/geo/mapping_bula.csv")
 bula_geo <- sf::read_sf("data/geo/DEU_adm/", layer = "DEU_adm1") |>
   dplyr::rename(Bundesland = NAME_1) |>
-  dplyr::inner_join(bula_map, by = "Bundesland")
+  dplyr::inner_join(bula_mapping, by = "Bundesland")
 
 current_data <- read_annual_data() |>
   add_first_call_column()
@@ -153,25 +153,7 @@ ui <- fluidPage(
           selectInput(
             "ts_bundesland",
             "Daten für welches Bundesland?",
-            choices = list(
-              "Alle" = "Alle",
-              "Baden-Württemberg" = "Baden-Württemberg",
-              "Bayern" = "Bayern",
-              "Berlin" = "Berlin",
-              "Brandenburg" = "Brandenburg",
-              "Bremen" = "Bremen",
-              "Hamburg" = "Hamburg",
-              "Hessen" = "Hessen",
-              "Mecklenburg-Vorpommern" = "Mecklenburg-Vorpommern",
-              "Niedersachsen" = "Niedersachsen",
-              "Nordrhein-Westfalen" = "Nordrhein-Westfalen",
-              "Rheinland-Pfalz" = "Rheinland-Pfalz",
-              "Saarland" = "Saarland",
-              "Sachsen" = "Sachsen",
-              "Sachsen-Anhalt" = "Sachsen-Anhalt",
-              "Schleswig-Holstein" = "Schleswig-Holstein",
-              "Thüringen" = "Thüringen"
-            )
+            choices = c("Alle", bula_mapping$Bundesland)
           )
         ),
         column(
@@ -413,7 +395,8 @@ server <- function(input, output, session) {
     create_herkunft_table(
       present_data$data,
       min(present_data$data$date),
-      max(present_data$data$date)
+      max(present_data$data$date),
+      bula_mapping
     )
   }
 
