@@ -104,8 +104,8 @@ create_provider_table <- function(df, unit, period_start, period_stop) {
 create_herkunft_table <- function(df, start_date, end_date) {
   # create large table with anrufe and anrufer weekly by bundesland
   df_processed <- df %>%
-    filter(date >= start_date & date <= end_date) %>%
-    mutate(
+    dplyr::filter(date >= start_date & date <= end_date) %>%
+    dplyr::mutate(
       Bundesland = case_when(
         # use abbreviations for more handy layout
         Bundesland == "Baden-Wuerttemberg" ~ "BW",
@@ -132,14 +132,17 @@ create_herkunft_table <- function(df, start_date, end_date) {
   # who didn't get through
 
   herkunft_table <- df_processed %>%
-    mutate(Kalenderwoche = isoweek(date), Jahr = lubridate::isoyear(date)) %>%
-    group_by(Jahr, Kalenderwoche) %>%
-    mutate(
+    dplyr::mutate(
+      Kalenderwoche = isoweek(date),
+      Jahr = lubridate::isoyear(date)
+    ) %>%
+    dplyr::group_by(Jahr, Kalenderwoche) %>%
+    dplyr::mutate(
       Start = format(min(date), "%Y-%m-%d"),
       Ende = format(max(date), "%Y-%m-%d")
     ) %>%
-    group_by(Jahr, Start, Bundesland) %>%
-    summarise(
+    dplyr::group_by(Jahr, Start, Bundesland) %>%
+    dplyr::summarise(
       Kalenderwoche = first(Kalenderwoche),
       Ende = first(Ende),
       Anrufe = n(),
@@ -152,7 +155,7 @@ create_herkunft_table <- function(df, start_date, end_date) {
       values_from = c(Anrufe, `Anrufer*innen`, `Erstanrufer*innen`),
       names_glue = "{Bundesland} {.value}"
     ) %>%
-    mutate(
+    dplyr::mutate(
       `Alle Anrufer*innen` = rowSums(
         across(ends_with(" Anrufer*innen")),
         na.rm = TRUE
@@ -165,14 +168,14 @@ create_herkunft_table <- function(df, start_date, end_date) {
         na.rm = TRUE
       )
     ) %>%
-    mutate(
+    dplyr::mutate(
       across(contains("ruf"), ~ ifelse(is.na(.x), 0, .x)),
       Jahr = as.character(Jahr)
     )
 
   # create a nice order of columns
   herkunft_table <- herkunft_table %>%
-    select(
+    dplyr::select(
       Jahr,
       Kalenderwoche,
       Start,
@@ -199,10 +202,10 @@ create_herkunft_table <- function(df, start_date, end_date) {
       contains("TH "),
       contains("Unbk.")
     ) %>%
-    arrange(desc(Start)) %>%
-    mutate(Start = lubridate::as_date(Start)) %>%
-    mutate(Ende = lubridate::as_date(Ende)) %>%
-    mutate(Kalenderwoche = as.integer(Kalenderwoche))
+    dplyr::arrange(desc(Start)) %>%
+    dplyr::mutate(Start = lubridate::as_date(Start)) %>%
+    dplyr::mutate(Ende = lubridate::as_date(Ende)) %>%
+    dplyr::mutate(Kalenderwoche = as.integer(Kalenderwoche))
 
   # The following is not really needed, information can be gained from other app features
   # more robustly
