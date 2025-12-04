@@ -1,16 +1,16 @@
 
 ```{r}
 library(tidyverse)
-all_files <- fs::dir_ls("R") |> 
+all_files <- fs::dir_ls(here::here("R")) |> 
     purrr::walk(source)
 
-systemfonts::add_fonts("assets/font/")
+systemfonts::add_fonts(here::here("assets/font/"))
 ```
 
 
 ```{r}
 
-calls <- read_annual_data()
+calls <- read_annual_data(path = here::here("data/raw/annual"))
 
 silbernetz_color_scheme <- c("#fddfc1", "#4c2582")
 
@@ -46,6 +46,9 @@ ggplot(plot_data, aes(weekday)) +
 
 # Plot successful/unsucessful calls per weekday
 ## To do: Anrufende, die nach mehreren Versuchen durchkommen als "successful" markieren? Legende übersetzen
+
+_feedback_: could we plot the share instead of the total numbers? Right now, the visual impression is that the **share** of successful calls is the same but this is not true because for some days there are more calls 
+
 ```{r}
 ggplot(plot_data, aes(weekday, fill = success)) +
   geom_bar(color = "#4c2582") +
@@ -59,6 +62,9 @@ ggplot(plot_data, aes(weekday, fill = success)) +
 ```
 
 # Day / Time of day tile map (all calls)
+feedback leo: this is a cool visualization, I like it a lot!! maybe we could do one version with all hours but then in the following plots exclude night times so that the color scale is more meaningful :) or you could use [tabsets](https://quarto.org/docs/output-formats/html-basics.html#tabsets) to always have one plot with all hours and one plot with only day-to-evening. 
+also, you could look into the ggiraph package (https://davidgohel.github.io/ggiraph/) to make the indivudal tiles hover-able: https://davidgohel.github.io/ggiraph/reference/geom_rect_interactive.html 
+
 
 ```{r}
 start_date <- "2025-01-01"
@@ -106,3 +112,19 @@ ggplot(plot_unsuccessful, aes(x = hour, y = weekday, fill = n)) +
   xlab("Uhrzeit") 
 
 ```
+
+
+
+more ideas / general feedback
+- legend position bottom (ggplot theme) might be a good idea to give the plots more horizontal space
+- do the tile map but with the **share of unsuccessful calls in each "tile"** (so it'd probably be groupby weekday, hour, summarize share = sum(success == false) / n()). i think that might be the most interesting metric from a "management perspective".
+- you could set the start and end date as document filters: https://quarto.org/docs/computations/parameters.html#knitr
+
+
+if you want to dig deeper into the unsuccessful calls, questions i've asked myself:
+- do people call again within the same hour/day again? or are they discouraged? are they successful then?
+- i'd be interested in what happens with first time callers: 
+  - if someone calls for the first time and isn't successful, do they try again?  how does  that look in comparison to people whose first call was a success? basically the "revisiting rate" of first time callers based on whether the first contact was successful.
+- in the data you get from `download_numbers`, there are additional columns that i find interesting, e.g. the `module_name`. i think i'll talk to Elke about that next week. maybe there's some morre analysis potential there :eyes: 
+
+
