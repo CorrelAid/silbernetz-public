@@ -70,14 +70,18 @@ ggplot(plot_share, aes(weekday, fill = success)) +
 ```
 
 # Day / Time of day tile map (all calls)
-feedback leo: this is a cool visualization, I like it a lot!! maybe we could do one version with all hours but then in the following plots exclude night times so that the color scale is more meaningful :) or you could use [tabsets](https://quarto.org/docs/output-formats/html-basics.html#tabsets) to always have one plot with all hours and one plot with only day-to-evening. 
 also, you could look into the ggiraph package (https://davidgohel.github.io/ggiraph/) to make the indivudal tiles hover-able: https://davidgohel.github.io/ggiraph/reference/geom_rect_interactive.html 
-
 
 ```{r}
 start_date <- "2025-01-01"
 end_date <- "2025-11-25"
 plot_data <- filter(calls, date >= start_date & date <= end_date)
+
+```
+
+::: {.panel-tabset}
+## Whole day (incl. night)
+```{r}
 
 start_time <- 0
 end_time <- 23
@@ -85,8 +89,6 @@ plot_data <- filter(plot_data, hour >= start_time & hour <= end_time)
 
 plot_map_data <- plot_data %>% 
   count(weekday, hour)
-```
-```{r}
 
 ggplot(plot_map_data, aes(x = hour, y = weekday, fill = n)) +
   geom_tile(color = "white",
@@ -101,6 +103,30 @@ ggplot(plot_map_data, aes(x = hour, y = weekday, fill = n)) +
   xlab("Uhrzeit") 
 
 ```
+## Daytime
+```{r}
+
+start_time <- 8
+end_time <- 21
+plot_data <- filter(plot_data, hour >= start_time & hour <= end_time)
+
+plot_map_data <- plot_data %>% 
+  count(weekday, hour)
+
+ggplot(plot_map_data, aes(x = hour, y = weekday, fill = n)) +
+  geom_tile(color = "white",
+            lwd = 1.5,
+            linetype = 1) +
+  coord_fixed() +
+  scale_fill_gradient(low = "white", high = "#4c2582") +
+  theme_minimal()+
+  theme(panel.grid = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "bottom") +
+  xlab("Uhrzeit") 
+
+```
+:::
 
 # Day / Time of day tile map (unsuccessful calls)
 
