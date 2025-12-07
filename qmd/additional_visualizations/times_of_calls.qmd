@@ -21,7 +21,7 @@ silbernetz_color_scheme <- c("#fddfc1", "#4c2582")
 calls <- calls %>%
   mutate(weekday = weekdays(date),
           hour = lubridate::hour(time)) %>% 
-  mutate(weekday = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"), labels = c("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag")))
+  mutate(weekday = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"), labels = c("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"))) 
 ```
 
 # Select time frame for plot
@@ -45,20 +45,28 @@ ggplot(plot_data, aes(weekday)) +
 ```
 
 # Plot successful/unsucessful calls per weekday
-## To do: Anrufende, die nach mehreren Versuchen durchkommen als "successful" markieren? Legende übersetzen
-
-_feedback_: could we plot the share instead of the total numbers? Right now, the visual impression is that the **share** of successful calls is the same but this is not true because for some days there are more calls 
+## To do: Anrufende, die nach mehreren Versuchen durchkommen als "successful" markieren?
 
 ```{r}
-ggplot(plot_data, aes(weekday, fill = success)) +
+plot_share <- plot_data %>% 
+  group_by(weekday) %>%
+  mutate(share = sum(success == FALSE) / n())
+
+labs <- paste0(format(100 * plot_share$share, digits = 4), "%")
+```
+
+```{r}
+ggplot(plot_share, aes(weekday, fill = success)) +
   geom_bar(color = "#4c2582") +
+  geom_text(aes(y=25000), label=labs, size=3.5, color="#595757ff") +
   scale_y_continuous(labels = scales::label_number()) +
-  ylab("Anzahl Anrufe") +
+  labs(y = "Anzahl Anrufe", title = "Anzahl Anrufe nach Wochentag", subtitle = "mit nicht durchgekommenen Anrufen in Prozent") +
+  guides(fill = guide_legend(title = "Anrufe")) +
   theme_classic() +
   theme(axis.title.x = element_blank(),
-  axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_manual(values = c("#ebebeb", "#4c2582"))
-
+  axis.text.x = element_text(angle = 45, hjust = 1),
+  legend.position = "bottom") +
+  scale_fill_manual(labels = c("nicht durchgegangen", "durchgegangen"), values = c("#ebebeb", "#4c2582"))
 ```
 
 # Day / Time of day tile map (all calls)
@@ -88,7 +96,8 @@ ggplot(plot_map_data, aes(x = hour, y = weekday, fill = n)) +
   scale_fill_gradient(low = "white", high = "#4c2582") +
   theme_minimal()+
   theme(panel.grid = element_blank(),
-        axis.title.y = element_blank()) +
+        axis.title.y = element_blank(),
+        legend.position = "bottom") +
   xlab("Uhrzeit") 
 
 ```
@@ -108,7 +117,8 @@ ggplot(plot_unsuccessful, aes(x = hour, y = weekday, fill = n)) +
   scale_fill_gradient(low = "white", high = "#4c2582") +
   theme_minimal()+
   theme(panel.grid = element_blank(),
-        axis.title.y = element_blank()) +
+        axis.title.y = element_blank(),
+        legend.position = "bottom") +
   xlab("Uhrzeit") 
 
 ```
@@ -116,7 +126,6 @@ ggplot(plot_unsuccessful, aes(x = hour, y = weekday, fill = n)) +
 
 
 more ideas / general feedback
-- legend position bottom (ggplot theme) might be a good idea to give the plots more horizontal space
 - do the tile map but with the **share of unsuccessful calls in each "tile"** (so it'd probably be groupby weekday, hour, summarize share = sum(success == false) / n()). i think that might be the most interesting metric from a "management perspective".
 - you could set the start and end date as document filters: https://quarto.org/docs/computations/parameters.html#knitr
 
