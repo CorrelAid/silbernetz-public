@@ -128,14 +128,12 @@ to make sure that R is installed in a directory not linked to OneDrive
 
 
 ### Clone 
-1. Clone GitHub Repository
+- manually download [0-clone.bat](https://github.com/CorrelAid/silbernetz-public/blob/main/windows_deployment/0-clone.bat) and double-click on it in the Downloads folder. This should start the command prompt ("Eingabeaufforderung") and clone the repository. 
+- the content of the repository will be put in `Dieser PC\[name]\Dokumente\silbernetz-dashboard`
 
-suggested location: `Benutzer/Dokumente/dashboard/`
-
-```
-git clone https://github.com/CorrelAid/silbernetz-public/
-```
-
+### Install r packages
+- open `Dieser PC\[name]\Dokumente\silbernetz-dashboard`
+- double click `windows_deployment/
 ### Move files
 
 1. move `.env`
