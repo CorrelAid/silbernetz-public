@@ -113,3 +113,37 @@ completely set up with OneDrive so that all files get synchronized, R
 can run into problems when installing new packages and we weren’t able
 to install the silbRnetz package. The best way to work around this, was
 to make sure that R is installed in a directory not linked to OneDrive
+
+
+# Deployment on Windows
+
+
+## Workflow New Machine
+
+### Prerequisites 
+
+- [install R](https://cran.r-project.org/bin/windows/base/)
+- [install R Tools](https://cran.r-project.org/bin/windows/Rtools/)
+- [install git](https://git-scm.com/install/windows)
+
+
+### Clone 
+1. Clone GitHub Repository
+
+suggested location: `Benutzer/Dokumente/dashboard/`
+
+```
+git clone https://github.com/CorrelAid/silbernetz-public/
+```
+
+### Move files
+
+1. move `.env`
+2. move csv files into `data/raw/annual`
+
+
+### install dependencies
+
+
+
+## Workflow Update Code
