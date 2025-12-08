@@ -19,7 +19,7 @@ update_call_data <- function(current_data, okz) {
   new_data <- new_data |>
     # function that wraps several functions to ensure things are done in the correct order
     # -> see modify_columns.R
-    clean_numbers()
+    clean_numbers(okz = okz)
   # create updated data from old data + new rows
   updated_data <- dplyr::bind_rows(current_data, new_data) |>
     add_first_call_column()

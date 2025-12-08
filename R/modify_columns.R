@@ -72,6 +72,7 @@ remove_duplicate_calls <- function(numbers_raw) {
 
 #' clean_numbers
 #' @param numbers_raw raw numbers data frame as returned by download_numbers
+#' @param okz Ortskennzahlen table
 #' @return tibble with duplicates removed, added columns is_landline, added Vorwahl & Bundesland, removed redundant columns and number hashed
 #' @details does several data cleaning and manipulation steps in the correct order.
 #' - type conversions date & time
@@ -79,9 +80,9 @@ remove_duplicate_calls <- function(numbers_raw) {
 #' - adds Vorwahl/Ortskennzahl and the Bundesland column (`add_geodata_to_numbers`)
 #' - remove unused columns
 #' - hashes the number of the caller
-clean_numbers <- function(numbers_raw) {
+clean_numbers <- function(numbers_raw, okz) {
   numbers_raw |>
-    # type conversions for date and time
+    # type conversions for date, id, time
     dplyr::mutate(
       date = lubridate::ymd(date),
       time = hms::as_hms(time),
