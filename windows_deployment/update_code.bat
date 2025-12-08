@@ -16,10 +16,11 @@ if %ERRORLEVEL% equ 0 (
     :: Create the new file and write the content into it
     echo %content% > "%newfilename%"
 
+    set 
     :: Write out current head commit id to current.txt
-    echo git rev-parse HEAD > current.txt
+    git rev-parse HEAD > current.txt
 ) else (
     echo Code did not update successfully!
 )
 
-pause
+::pause
