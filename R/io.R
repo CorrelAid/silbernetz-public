@@ -24,19 +24,33 @@ split_and_write <- function(
 
 #' reads separate annual csv's and binds them together
 #' @param path data folder path. defaults to `data/raw/annual`
-#' @param col_types column types for readr::read_csv. defaults to "Dtciillccccl"
 #' @return tibble data frame with all calls since 2020.
 read_annual_data <- function(
-  path = Sys.getenv("DATA_FOLDER"),
-  col_types = "Dtciillccccl"
+  path = Sys.getenv("DATA_FOLDER")
 ) {
   if (path == "") {
     stop(
       "environment variable DATA_FOLDER is not set. See README on how to set up the .env file."
     )
   }
-  fs::dir_ls(path, glob = "*.csv") |>
-    purrr::map_dfr(readr::read_csv, col_types = col_types)
+
+  col_types_l <- cols(
+    id = col_character(),
+    date = col_date(),
+    time = col_time(),
+    caller = col_character(),
+    duration_inbound = col_integer(),
+    duration_outbound = col_integer(),
+    success = col_logical(),
+    Ortsnetzkennzahl = col_character(),
+    Bundesland = col_character(),
+    PLZ = col_character(),
+    firstcall = col_logical(),
+    is_landline = col_logical(),
+    modul_name = col_character()
+  )
+  df <- fs::dir_ls(path, glob = "*.csv") |>
+    purrr::map_dfr(readr::read_csv, col_types = col_types_l)
 }
 
 read_current_data <- function(

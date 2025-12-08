@@ -17,10 +17,9 @@ update_call_data <- function(current_data, okz) {
   )
   print("Adding geodata and hashing.")
   new_data <- new_data |>
-    add_is_landline_column() |>
-    add_geodata_to_numbers(okz = okz) |>
-    remove_redundant_cols() |>
-    hash_col()
+    # function that wraps several functions to ensure things are done in the correct order
+    # -> see modify_columns.R
+    clean_numbers()
   # create updated data from old data + new rows
   updated_data <- dplyr::bind_rows(current_data, new_data) |>
     add_first_call_column()
