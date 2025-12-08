@@ -35,19 +35,19 @@ read_annual_data <- function(
   }
 
   col_types_l <- readr::cols(
-    id = col_character(),
-    date = col_date(),
-    time = col_time(),
-    caller = col_character(),
-    duration_inbound = col_integer(),
-    duration_outbound = col_integer(),
-    success = col_logical(),
-    Ortsnetzkennzahl = col_character(),
-    Bundesland = col_character(),
-    PLZ = col_character(),
-    firstcall = col_logical(),
-    is_landline = col_logical(),
-    modul_name = col_character()
+    id = readr::col_character(),
+    date = readr::col_date(),
+    time = readr::col_time(),
+    caller = readr::col_character(),
+    duration_inbound = readr::col_integer(),
+    duration_outbound = readr::col_integer(),
+    success = readr::col_logical(),
+    Ortsnetzkennzahl = readr::col_character(),
+    Bundesland = readr::col_character(),
+    PLZ = readr::col_character(),
+    firstcall = readr::col_logical(),
+    is_landline = readr::col_logical(),
+    modul_name = readr::col_character()
   )
   df <- fs::dir_ls(path, glob = "*.csv") |>
     purrr::map_dfr(readr::read_csv, col_types = col_types_l)

@@ -128,19 +128,26 @@ to make sure that R is installed in a directory not linked to OneDrive
 
 
 ### Clone 
+- start Git CMD in the background
 - manually download [0-clone.bat](https://github.com/CorrelAid/silbernetz-public/blob/main/windows_deployment/0-clone.bat) and double-click on it in the Downloads folder. This should start the command prompt ("Eingabeaufforderung") and clone the repository. 
 - the content of the repository will be put in `Dieser PC\[name]\Dokumente\silbernetz-dashboard`
 
-### Install r packages
-- open `Dieser PC\[name]\Dokumente\silbernetz-dashboard`
-- double click `windows_deployment/
+### install R packages
+- open Command prompt ("Eingabeaufforderung")
+- cd to project folder: `cd Documents\silbernetz-dashboard`
+- `C:\Programme\R\R-4.5.2\bin\R`
+- in the R console:
+    - install `renv`: `install.packages("renv")`
+    - `renv::install()` (not restore because that somehow builds from source?)
+
+- installation issue with s2 package -> took 11 minutes!!
+
 ### Move files
 
-1. move `.env`
+1. move `.env` to project root
 2. move csv files into `data/raw/annual`
 
 
-### install dependencies
 
 
 

@@ -4,6 +4,8 @@ library(dplyr)
 library(ggplot2)
 library(openxlsx)
 library(here)
+library(readr)
+library(fs)
 library(sf)
 
 # load .env
