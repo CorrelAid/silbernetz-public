@@ -1,6 +1,6 @@
 
 ```{r}
-library(tidyverse)
+library(dplyr)
 source("R/api.R")
 source("R/modify_columns.R")
 source("R/io.R")
@@ -9,21 +9,23 @@ dotenv::load_dot_env()
 
 
 ```{r}
-current_data <- read_annual_data() |> 
-  add_first_call_column()
+current_data <- read_annual_data() |> select(-firstcall)
+  #add_first_call_column()
 ```
 
 # Duplicates
 
 ```{r}
 cd_dist <- current_data |> 
-    distinct()
+    distinct() # distinct on all rows
 
 if (cd_dist |> nrow() != current_data |> nrow())  {
     stop(sprintf("there are duplicates: %i rows vs %i distinct rows", nrow(current_data), nrow(cd_dist)))
 
 }
+print(colnames(current_data))
 ```
+
 
 ```{r}
 cd_dup <- current_data |> 
@@ -32,6 +34,13 @@ cd_dup <- current_data |>
     mutate(year = lubridate::year(date))
 table(cd_dup$year, cd_dup$n)
 ```
+
+```{r}
+# how many duplicates
+n_dup <- (cd_dup |> filter(n == 2) |> nrow()) / 2 # divide by two 
+n_dup
+```
+
 
 **Hypothesis**: This is a technical artifact from how calls are handled within the call provider. we can check the additional info from the API that is contained in the output of `download_numbers`. 
 
@@ -45,6 +54,11 @@ nmb_technical_details <- nmb |> group_by(caller, date, time) |>
     mutate(is_dup = n > 1) |> 
     select(n, is_dup, date, time, caller, modul_name, duration_inbound, duration_outbound, success)
 
+```
+
+
+```{r}
+table(nmb_technical_details$n)
 ```
 
 support for hypothesis: 
@@ -61,9 +75,46 @@ table(nmb_technical_details$success, nmb_technical_details$is_dup)
 table(nmb_technical_details$modul_name, nmb_technical_details$is_dup)
 ```
 
+
 - all calls did have duration = 0 
 ```{r}
 table(nmb_technical_details$duration_inbound == 0, nmb_technical_details$is_dup)
+```
+
+
+```{r}
+remove_duplicate_calls <- function(numbers_df) {
+  numbers_df |>
+    dplyr::distinct()
+}
+
+n_dup <- sum(nmb_technical_details$n > 1) / 2
+nmb_no_dup <- remove_duplicate_calls(nmb_technical_details)
+print(nrow(nmb_no_dup))
+
+stopifnot((nrow(nmb) - nrow(nmb_no_dup)) == n_dup)
+table(cd_no_dup$n)
+```
+
+```{r}
+nmb_no_dup |> 
+    count(caller, date, time) |> 
+    arrange(desc(n))
+```
+
+```{r}
+table(nmb_technical_details$modul_name, nmb_technical_details$success)
+```
+
+
+```{r}
+# with full clean function
+cleaned <- clean_numbers(nmb)
+stopifnot((nrow(nmb) - nrow(cleaned))  == n_dup)
+```
+
+```{r}
+current_data_d$n_row |> summary()
 ```
 
 
@@ -123,3 +174,4 @@ ggplot(calls_by_day) +
 calls_by_day |> 
     arrange(n)
 ```
+
