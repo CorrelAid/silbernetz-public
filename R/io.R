@@ -34,7 +34,7 @@ read_annual_data <- function(
     )
   }
 
-  col_types_l <- cols(
+  col_types_l <- readr::cols(
     id = col_character(),
     date = col_date(),
     time = col_time(),
