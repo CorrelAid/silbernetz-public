@@ -8,8 +8,6 @@ git pull
 if %ERRORLEVEL% equ 0 (
     echo Code updated successfully!
 
-    echo %ISODATE%, %GITHASH% >> deployed_versions.txt
-
     rem Get git hash (suppress error output). usebackq + backticks form.
     for /f "usebackq delims=" %%H in (`git rev-parse --verify HEAD 2^>nul`) do set "GITHASH=%%H"
 
