@@ -8,10 +8,6 @@ git pull
 if %ERRORLEVEL% equ 0 (
     echo Code updated successfully!
 
-    :: Write out current head commit id to current.txt
-    for /f %%i in ('git rev-parse HEAD') do set GITHASH=%%i
-    for /f %%i in ('powershell -NoProfile -Command "(Get-Date).ToString(\"yyyy-MM-dd\")"') do set ISODATE=%%i
-
     echo %ISODATE%, %GITHASH% >> deployed_versions.txt
 
     rem Get git hash (suppress error output). usebackq + backticks form.
@@ -32,7 +28,7 @@ if %ERRORLEVEL% equ 0 (
     )
 
     rem Append to versions.txt using delayed expansion so variables expand at runtime
-    >>deployed_versions.txt echo !ISODATE!, !GITHASH!
+    >>pulled_versions.txt echo !ISODATE!, !GITHASH!
 
     endlocal
 

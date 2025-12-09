@@ -20,4 +20,4 @@ R/api_spec.R
 qmd/*.html
 
 # windows deployment logging
-windows_deployment/deployed_versions.txt
+windows_deployment/pulled_versions.txt
