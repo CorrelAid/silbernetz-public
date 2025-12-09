@@ -142,7 +142,8 @@ to make sure that R is installed in a directory not linked to OneDrive
     - install `renv`: `install.packages("renv")`
     - `renv::install()` (not restore wbecause that somehow builds from source?)
 
-- installation issue with s2 package -> took 11 minutes!!
+Note: installation of `s2` package takes a while (> 10 minutes). 
+
 
 ### Move files
 
@@ -150,6 +151,33 @@ to make sure that R is installed in a directory not linked to OneDrive
 2. move csv files into `data/raw/annual`
 
 
+
+### In real life
+- put on USB stick:
+    - installers (Git, R, R Tools) 
+    - `.env`
+    - `annual`
+    - `0-clone.bat`
+- insert USB stick into machine and pull all assets into `Downloads`
+- start Git installer and follow default installation except:
+    - don't use vim but Notepad
+    - change default branch to main
+    - don't create menu entry
+- simultaneously, start R installer -> follow default installation except:
+    - don't create Desktop shortcut
+- once Git has finished, double click `0-clone.bat` to clone the repo and open it in the file explorer
+    - copy csv files from `annual` into the `data/raw/annual` folder of the repository
+    - copy `.env` into root folder of repository
+- once R installation is finished, start installing RTools -> follow default installation
+- open command prompt ("Eingabeaufforderung")
+    - `cd Documents\silbernetz-dashboard`
+    - open R console: Path depends on whether the installation was local or with admin rights (see above). the path within the R folder is `bin/R`
+    - `renv` should start bootstrapping itself, i.e. installing itself
+- wait until RTools installation has finished
+- then: `renv::install()`
+- in the meantime, create shortcut on Desktop: right click on bat file -> "Weitere Optionen anzeigen" -> "Verknüpfung erstellen" -> copy paste the Verknüpfung to Desktop and potentially rename
+    - `windows_deployment/start_dashboard.bat` for when the user has admin rights and R was isntalled to C:\Programme
+    - `windows_deployment/start_dashboard_local_rinstall.bat for when the user does not have admin rights and R was installed to C:\Users\[user]\AppData\... (see above)
 
 
 
