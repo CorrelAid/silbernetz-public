@@ -18,3 +18,6 @@ R/api_spec.R
 # quarto output
 *_files/
 qmd/*.html
+
+# windows deployment logging
+windows_deployment/deployed_versions.txt
