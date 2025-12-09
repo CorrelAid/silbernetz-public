@@ -123,6 +123,8 @@ to make sure that R is installed in a directory not linked to OneDrive
 ### Prerequisites 
 
 - [install R](https://cran.r-project.org/bin/windows/base/)
+    - on machines with admin rights, this will install to `C:\Programme\R\R-4.5.2`
+    - on machines without admin rights, installation location is `C:\Users\[user]\AppData\Local\Programs\R\R-4.5.2`
 - [install R Tools](https://cran.r-project.org/bin/windows/Rtools/)
 - [install git](https://git-scm.com/install/windows)
 
@@ -138,7 +140,7 @@ to make sure that R is installed in a directory not linked to OneDrive
 - `C:\Programme\R\R-4.5.2\bin\R`
 - in the R console:
     - install `renv`: `install.packages("renv")`
-    - `renv::install()` (not restore because that somehow builds from source?)
+    - `renv::install()` (not restore wbecause that somehow builds from source?)
 
 - installation issue with s2 package -> took 11 minutes!!
 
