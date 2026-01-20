@@ -1,0 +1,49 @@
+---
+title: "Analyses of unsuccessful calls"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+all_files <- fs::dir_ls(here::here("R")) |> 
+    purrr::walk(source)
+
+systemfonts::add_fonts(here::here("assets/font/"))
+```
+
+```{r}
+calls <- read_annual_data(path = here::here("data/raw/annual"))
+silbernetz_color_scheme <- c("#fddfc1", "#4c2582")
+
+```
+
+```{r}
+cnt_calls <- calls %>% 
+    group_by(caller, date) %>%
+    mutate(n_success_calls = sum(success == TRUE, na.rm = TRUE),
+           n_calls = n()) %>%
+    ungroup() %>% 
+    select(date, time, caller, success, n_success_calls, n_calls)
+```
+There seems to be more than one successful call per 15h for some callers. Check with Elke how the 15 hours block list is created exactly.
+```{r}
+cnt_calls <- cnt_calls %>% 
+    select(date, caller, n_success_calls, n_calls) %>%
+    unique() %>% 
+    mutate(success = if_else(n_success_calls > 0,
+                             TRUE, 
+                             FALSE))
+```
+There are callers with more than 100 calls per day. Something seems to be off here? 
+```{r}
+ggplot(cnt_calls, aes(x=n_calls, fill=success)) +
+    geom_histogram() 
+    #+
+    #scale_fill_manual(values=c("#69b3a2", "#404080")) +
+    #theme_ipsum() +
+    #labs(fill="")
+```
+```{r}
+Looking at unsuccessful calls only
+```
