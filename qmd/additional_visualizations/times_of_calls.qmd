@@ -1,3 +1,8 @@
+---
+params:
+  start_date: "2025-01-01"
+  end_date: "2025-11-25"
+---
 
 ```{r}
 library(tidyverse)
@@ -26,9 +31,7 @@ calls <- calls %>%
 
 # Select time frame for plot
 ```{r}
-start_date <- "2025-01-01"
-end_date <- "2025-11-25"
-plot_data <- filter(calls, date >= start_date & date <= end_date)
+plot_data <- filter(calls, date >= params$start_date & date <= params$end_date)
 ```
 
 # Plot all calls per weekday
@@ -73,9 +76,8 @@ ggplot(plot_share, aes(weekday, fill = success)) +
 also, you could look into the ggiraph package (https://davidgohel.github.io/ggiraph/) to make the indivudal tiles hover-able: https://davidgohel.github.io/ggiraph/reference/geom_rect_interactive.html 
 
 ```{r}
-start_date <- "2025-01-01"
-end_date <- "2025-11-25"
-plot_data <- filter(calls, date >= start_date & date <= end_date)
+
+plot_data <- filter(calls, date >= params$start_date & date <= params$end_date)
 
 ```
 
@@ -131,8 +133,7 @@ ggplot(plot_map_data, aes(x = hour, y = weekday, fill = n)) +
 # Day / Time of day tile map (unsuccessful calls)
 
 ```{r}
-plot_unsuccessful <- filter(plot_data, success == FALSE)
-plot_unsuccessful <- plot_unsuccessful %>% 
+plot_unsuccessful <- filter(plot_data, success == FALSE) %>% 
   count(weekday, hour)
 
 ggplot(plot_unsuccessful, aes(x = hour, y = weekday, fill = n)) +
@@ -149,15 +150,37 @@ ggplot(plot_unsuccessful, aes(x = hour, y = weekday, fill = n)) +
 
 ```
 
+# Day / Time of day tile map (share of unsuccessful calls)
+
+```{r}
+start_date <- "2025-01-01"
+end_date <- "2025-11-25"
+plot_data <- filter(calls, date >= start_date & date <= end_date)
+
+plot_unsuccessful <- plot_data %>% 
+  group_by(weekday, hour) %>% 
+  summarize( share = sum(success == FALSE) / n())
 
 
-more ideas / general feedback
-- do the tile map but with the **share of unsuccessful calls in each "tile"** (so it'd probably be groupby weekday, hour, summarize share = sum(success == false) / n()). i think that might be the most interesting metric from a "management perspective".
-- you could set the start and end date as document filters: https://quarto.org/docs/computations/parameters.html#knitr
 
+```
 
-if you want to dig deeper into the unsuccessful calls, questions i've asked myself:
-- do people call again within the same hour/day again? or are they discouraged? are they successful then?
+```{r}
+ggplot(plot_unsuccessful, aes(x = hour, y = weekday, fill = share)) +
+  geom_tile(color = "white",
+            lwd = 1.5,
+            linetype = 1) +
+  coord_fixed() +
+  scale_fill_gradient(low = "white", high = "#4c2582") +
+  theme_minimal()+
+  theme(panel.grid = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "bottom") +
+  xlab("Uhrzeit") 
+
+```
+
+## Additional possible analyses
 - i'd be interested in what happens with first time callers: 
   - if someone calls for the first time and isn't successful, do they try again?  how does  that look in comparison to people whose first call was a success? basically the "revisiting rate" of first time callers based on whether the first contact was successful.
 - in the data you get from `download_numbers`, there are additional columns that i find interesting, e.g. the `module_name`. i think i'll talk to Elke about that next week. maybe there's some morre analysis potential there :eyes: 
