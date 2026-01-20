@@ -1,9 +1,10 @@
 
 ```{r}
+
 # source all R files in R/
 all_files <- fs::dir_ls("R") |> 
     walk(source)
-library(tidyverse)
+
 geo <- readr::read_csv("data/geo/mastertable_vorw_bdl.csv")
 ```
 

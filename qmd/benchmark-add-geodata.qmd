@@ -1,7 +1,8 @@
 
 ```{r}
-library(bench)
-library(tidyverse)
+library(bench) # install manually
+library(dplyr)
+library(readr)
 dotenv::load_dot_env()
 # source all R files in R/
 all_files <- fs::dir_ls("R") |> 

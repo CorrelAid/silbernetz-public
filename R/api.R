@@ -26,6 +26,10 @@ build_query_params <- function(start_date, end_date) {
     return(NULL)
   }
 
+  if (end_date < start_date) {
+    warning("Your start date is later than your end date. Please fix.")
+    return(NULL)
+  }
   params <- ""
   if (!is.null(start_date) && !is.null(end_date)) {
     # both are provided -> build param string
@@ -45,14 +49,14 @@ build_query_params <- function(start_date, end_date) {
 #'
 #' @param endpoint Specifies which data to download. Has to be one of
 #'  one of Dest, Dest_Count, Numbers, Numbers_Count, Callerlists.
-#' @param start_date First date of the period of interest. Format: YYYY-MM-DD.
-#' @param end_date Last date of the period of interest. Format: YYYY-MM-DD.
+#' @param start_date First date of the period of interest. Format: YYYY-MM-DD. Defaults to today.
+#' @param end_date Last date of the period of interest. Format: YYYY-MM-DD. Defaults to today.
 #' @return A tibble of response data, a single count value (for `*_Count`
 #'   endpoints), or `NULL` if the endpoint is invalid.
 #'
 #' @examples
 #' \dontrun{
-#' download_data("Dest", start_date = "2021-05-01", end_date = "2021-05-31")}
+#' download_data("Numbers", start_date = Sys.date(), end_date = Sys.date())}
 #'
 download_data <- function(
   endpoint,
@@ -83,7 +87,21 @@ download_data <- function(
 
 download_numbers <- function(start_date, end_date) {
   # call count API to see whether we exceed 100k rows
+  count_at_start_date <- download_data("Numbers_Count", start_date, start_date)
+  if (count_at_start_date == 0) {
+    warning(
+      "No data available from API for your start date. The API might not go back that far..."
+    )
+  }
+
   count <- download_data("Numbers_Count", start_date, end_date)
+  if (count == 0) {
+    warning(
+      "No data available from API for your date range. The API might not go back that far..."
+    )
+    return(tibble::tibble())
+  }
+
   print(sprintf("Downloading Numbers between %s and %s", start_date, end_date))
 
   if (count > 100000) {
@@ -109,10 +127,17 @@ download_numbers <- function(start_date, end_date) {
     dat <- download_data("Numbers", start_date, end_date)
   }
 
+  if (nrow(dat) == 0) {
+    print("No data returned by API. Maybe your start date is too far back?")
+    return(dat)
+  }
+
+  return(dat)
   # only keep specific columns
   dat |>
     dplyr::select(any_of(
       c(
+        "id",
         "date",
         "time",
         "service",
@@ -124,9 +149,7 @@ download_numbers <- function(start_date, end_date) {
         "duration_outbound",
         "success"
       )
-    )) |>
-    # type conversions for date and time
-    dplyr::mutate(date = lubridate::ymd(date), time = hms::as_hms(time))
+    ))
 }
 
 #' Perform a GET request to an API endpoint

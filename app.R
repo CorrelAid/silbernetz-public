@@ -4,6 +4,8 @@ library(dplyr)
 library(ggplot2)
 library(openxlsx)
 library(here)
+library(readr)
+library(fs)
 library(sf)
 
 # load .env
@@ -16,7 +18,10 @@ bula_geo <- sf::read_sf("data/geo/DEU_adm/", layer = "DEU_adm1") |>
   dplyr::rename(Bundesland = NAME_1) |>
   dplyr::inner_join(bula_mapping, by = "Bundesland")
 
+
+# TODO: Talk to Elke on how to deal with duplicates
 current_data <- read_annual_data() |>
+  #remove_duplicate_calls() |>
   add_first_call_column()
 
 # load font

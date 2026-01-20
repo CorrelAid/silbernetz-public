@@ -175,7 +175,7 @@ create_herkunft_table <- function(df, start_date, end_date, bula_mapping) {
       sort(names(select(., contains("Mobil")))),
       sort(setdiff(
         names(.),
-        c(fixed, names(select(., contains("Alle"), contains("Mobil"))))
+        c(cols_at_start, names(select(., contains("Alle"), contains("Mobil"))))
       )) # takes all columns that have not been sorted yet and sorts them alphabetically.  works out fine because "Unbek." is after the last Bundesland (TH)
     ) %>%
     dplyr::arrange(desc(Start)) %>%

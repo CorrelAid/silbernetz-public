@@ -1,7 +1,6 @@
 
 ```{r}
 
-library(tidyverse)
 # fix ue -> ü in data
 mastertable <- readr::read_csv("data/geo/mastertable_vorw_bdl.csv")
 
