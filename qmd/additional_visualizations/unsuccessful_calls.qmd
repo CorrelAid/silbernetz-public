@@ -6,6 +6,8 @@ format: html
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(lubridate)
+
 all_files <- fs::dir_ls(here::here("R")) |> 
     purrr::walk(source)
 
@@ -18,6 +20,25 @@ silbernetz_color_scheme <- c("#fddfc1", "#4c2582")
 
 ```
 
+Erfolgreiche Anrufe nach Uhrzeit
+```{r}
+df <- calls %>%
+  mutate(hour = hour(time))
+
+df %>%
+  filter(success) %>%
+  count(hour) %>%
+  ggplot(aes(x = hour, y = n)) +
+  geom_col(fill = "steelblue") +
+  scale_x_continuous(breaks = 0:23) +
+  labs(
+    x = "Uhrzeit (Stunde)",
+    y = "Anzahl success = TRUE",
+    title = "Verteilung erfolgreicher Gespräche nach Uhrzeit"
+  ) +
+  theme_minimal()
+
+```
 ```{r}
 cnt_calls <- calls %>% 
     group_by(caller, date) %>%
@@ -37,13 +58,131 @@ cnt_calls <- cnt_calls %>%
 ```
 There are callers with more than 100 calls per day. Something seems to be off here? 
 ```{r}
-ggplot(cnt_calls, aes(x=n_calls, fill=success)) +
-    geom_histogram() 
-    #+
-    #scale_fill_manual(values=c("#69b3a2", "#404080")) +
-    #theme_ipsum() +
-    #labs(fill="")
+
+cnt_calls %>%
+  mutate(n_calls_capped = if_else(n_calls > 10, 11, n_calls)) %>%
+  ggplot(aes(x = n_calls_capped, fill=success)) +
+  geom_histogram(
+    binwidth = 1,
+    center = 1,
+    color = "white",
+    alpha = 0.5
+  ) +
+  scale_x_continuous(
+    breaks = c(1:10, 11),
+    labels = c(1:10, "10+")
+  ) +
+  labs(x = "Number of calls", y = "Count") +
+    scale_fill_manual(values=silbernetz_color_scheme) 
 ```
+
+Es muss nochmal geklärt werden, welche Spalte was bedeutet. "success" = True gibt es z.B. auch zu Uhrzeiten, in denen die Hotline gar nicht betreut ist?
+Ich bewerte hier mal Anrufe, die In- und Outbound einen Wert größer 0 haben als successful. 
 ```{r}
-Looking at unsuccessful calls only
+calls <- read_annual_data(path = here::here("data/raw/annual"))
+
+cnt_calls <- calls %>% 
+    mutate(success = ifelse(duration_inbound > 0 & duration_outbound > 0, TRUE, FALSE)) %>% 
+    group_by(caller, date) %>%
+    mutate(n_success_calls = sum(success == TRUE, na.rm = TRUE),
+           n_calls = n()) %>%
+    ungroup() 
+```
+Erfolgreiche Anrufe nach Uhrzeit --> passt eher zu den Hotline-Zeiten?
+```{r}
+df <- cnt_calls %>%
+  mutate(hour = hour(time))
+
+df %>%
+  filter(success) %>%
+  count(hour) %>%
+  ggplot(aes(x = hour, y = n)) +
+  geom_col(fill = "steelblue") +
+  scale_x_continuous(breaks = 0:23) +
+  labs(
+    x = "Uhrzeit (Stunde)",
+    y = "Anzahl success = TRUE",
+    title = "Verteilung erfolgreicher Gespräche nach Uhrzeit"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+cnt_calls <- cnt_calls %>% 
+  select(date, caller, n_success_calls, n_calls) %>%
+    unique() %>% 
+    mutate(success = if_else(n_success_calls > 0,
+                             TRUE, 
+                             FALSE))
+```
+Anzahl Anrufe
+
+```{r}
+cnt_calls %>%
+  mutate(n_calls_capped = if_else(n_calls > 10, 11, n_calls)) %>%
+  ggplot(aes(x = n_calls_capped)) +
+  geom_histogram(binwidth = 1,
+    center = 1,
+    color = "white",
+    alpha = 0.5) +
+  scale_x_continuous(
+    breaks = c(1:10, 11),
+    labels = c(1:10, "10+")
+  ) +
+  labs(
+    x = "Anzahl Anrufe",
+    y = "Anzahl",
+    title = "Häufigkeit der Anzahl Anrufe pro Person / Tag "
+  )
+```
+Abbildung mit Anzahl der Anrufe unter denjenigen, die nie durchgekommen sind
+```{r}
+no_success <- cnt_calls %>% 
+  filter(!success)
+
+test <- no_success %>%
+  mutate(n_calls_capped = if_else(n_calls > 10, 11, n_calls))
+
+no_success %>%
+  mutate(n_calls_capped = if_else(n_calls > 10, 11, n_calls)) %>%
+  ggplot(aes(x = n_calls_capped)) +
+  geom_histogram(
+    binwidth = 1,
+    center = 1,
+    color = "white",
+    alpha = 0.5
+  ) +
+  scale_x_continuous(
+    breaks = c(1:10, 11),
+    labels = c(1:10, "10+")
+  ) +
+  labs(x = "Anzahl Anrufe pro Anrufer*in und Tag", y = "Anzahl") +
+  scale_fill_manual(values=silbernetz_color_scheme) 
+```
+Vergleich mit denen, die irgendwann durchgekommen sind
+
+```{r}
+cnt_calls %>%
+  mutate(n_calls_capped = if_else(n_calls > 10, 11, n_calls)) %>%
+  ggplot(aes(x = n_calls_capped, fill=success)) +
+  geom_histogram(
+    binwidth = 1,
+    center = 1,
+    color = "white",
+    alpha = 0.5
+  ) +
+  scale_x_continuous(
+    breaks = c(1:10, 11),
+    labels = c(1:10, "10+")
+  ) +
+  labs(x = "Anzahl Anrufe pro Anrufer*in und Tag", y = "Anzahl", fill = "Mind. ein erfolgreicher\nAnruf am Tag") +
+  scale_fill_manual(values=silbernetz_color_scheme,
+                    labels = c("Nein", "Ja")) +
+  theme_minimal()
+```
+
+50% der Leute hören nach einem Anruf auf, es zu probieren, nur 10% der Personen probieren es mehr als 4mal“
+```{r}
+quantile(cnt_calls$n_calls, probs = c(0.5, 0.75, 0.9))
 ```
