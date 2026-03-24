@@ -1,15 +1,15 @@
 
 ```{r}
 library(dplyr)
-source("R/api.R")
-source("R/modify_columns.R")
-source("R/io.R")
-dotenv::load_dot_env()
+source(here::here("R/api.R"))
+source(here::here("R/modify_columns.R"))
+source(here::here("R/io.R"))
+dotenv::load_dot_env(here::here(".env"))
 ```
 
 
 ```{r}
-current_data <- read_annual_data() |> select(-firstcall)
+current_data <- read_annual_data(path = here::here("data/raw/annual")) |> select(-firstcall)
   #add_first_call_column()
 ```
 

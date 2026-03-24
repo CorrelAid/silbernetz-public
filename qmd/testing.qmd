@@ -1,0 +1,46 @@
+
+```{r}
+all_files <- fs::dir_ls(here::here("R")) |>
+    purrr::walk(source)
+dotenv::load_dot_env()
+bula_map <- readr::read_csv("data/geo/mapping_bula.csv")
+systemfonts::add_fonts("assets/font/")
+```
+
+
+
+```{r}
+calls <- read_annual_data()
+create_provider_table(calls, "month", min(calls$date), max(calls$date))
+```
+
+```{r}
+calls$is_landline
+```
+
+```{r}
+create_herkunft_table(calls, min(calls$date), max(calls$date), bula_map)
+```
+
+
+```{r}
+calls <- read_annual_data()
+calls$landline <- NULL
+calls$is_landline <- as.logical(calls$is_landline)
+calls |> split_and_write()
+```
+
+
+```{r}
+colnames(calls)
+```
+
+```{r}
+nmb <- download_numbers("2026-02-03", Sys.Date())
+
+
+nrow(nmb)
+nmb_r <- nmb %>% remove_ausland_calls()
+nrow(nmb_r)
+```
+

@@ -70,6 +70,20 @@ remove_duplicate_calls <- function(numbers_raw) {
     dplyr::distinct()
 }
 
+#' removes calls from foreign countries
+#' @param numbers_raw raw numbers data frame as returned by download_numbers
+#' @return tibble of calls with those removed that do not have (00)49 as first numbers.
+#' @details removes all rows where caller does not start with 0049 
+remove_ausland_calls <- function(numbers_raw) {
+  numbers_raw |>
+    dplyr::filter(
+      stringr::str_detect(
+        caller,
+        "^0049|^491"
+      )
+    )
+}
+
 #' clean_numbers
 #' @param numbers_raw raw numbers data frame as returned by download_numbers
 #' @param okz Ortskennzahlen table
@@ -88,6 +102,7 @@ clean_numbers <- function(numbers_raw, okz) {
       time = hms::as_hms(time),
       id = as.character(id)
     ) |>
+    remove_ausland_calls() |>
     add_is_landline_column() |>
     remove_redundant_cols() |>
     add_geodata_to_numbers(okz = okz) |>

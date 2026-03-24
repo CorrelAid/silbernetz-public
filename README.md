@@ -176,7 +176,7 @@ Note: installation of `s2` package takes a while (> 10 minutes).
 - wait until RTools installation has finished
 - then: `renv::install()`
 - in the meantime, create shortcut on Desktop: right click on bat file -> "Weitere Optionen anzeigen" -> "Verknüpfung erstellen" -> copy paste the Verknüpfung to Desktop and potentially rename
-    - `windows_deployment/start_dashboard.bat` for when the user has admin rights and R was isntalled to C:\Programme
+    - `windows_deployment/start_dashboard.bat` for when the user has admin rights and R was installed to C:\Programme
     - `windows_deployment/start_dashboard_local_rinstall.bat for when the user does not have admin rights and R was installed to C:\Users\[user]\AppData\... (see above)
 
 
